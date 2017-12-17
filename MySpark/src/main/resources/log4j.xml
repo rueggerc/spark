@@ -9,7 +9,7 @@
 	</appender>
 	
 	<appender name="ROLL" class="org.apache.log4j.RollingFileAppender">
-		<param name="File" value="/logs/MySpark.log" />
+		<param name="File" value="/home/hadoop/logs/MySpark.log" />
 		<param name="Append" value="true" />
 		<param name="MaxFileSize" value="100MB" />
 		<param name="MaxBackupIndex" value="3" />
