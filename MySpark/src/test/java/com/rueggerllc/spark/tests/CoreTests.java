@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.junit.After;
@@ -21,6 +22,8 @@ import org.junit.Test;
 import com.rueggerllc.spark.beans.Foo;
 import com.rueggerllc.spark.beans.MyFilter;
 import com.rueggerllc.spark.functions.MyPredicate;
+
+import scala.Tuple2;
 
 public class CoreTests {
 
@@ -64,30 +67,35 @@ public class CoreTests {
 			Logger.getLogger("org").setLevel(Level.ERROR);
 			
 			
-			String[] petsArray = {"Captain Foobar the Later", "Darwin the", "Oscar hey Bud Lets Party"};
-			List<String> thePets = Arrays.asList(petsArray);
+			// String[] petsArray = {"Captain Foobar the Later", "Darwin the", "Oscar hey Bud Lets Party"};
+			// List<String> thePets = Arrays.asList(petsArray);
+			List<String> thePets = Arrays.asList("Captain and the Foos", "later Much", "the Dakota", "Foos Oscar");
 			
 		    SparkConf conf = new SparkConf().setAppName("myFlatMap").setMaster("local[2]");
 		    JavaSparkContext sc = new JavaSparkContext(conf);
-		    
-		    
-		    
-		    
+		   
 		    JavaRDD<String> lines = sc.parallelize(thePets);
 		    JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
 		    
-		    logger.info("========= Test FlatMap BEGIN ===========");
-		    
-		    // Collect RDD for printing
-	        for(String word : words.collect()){
-	            logger.info(word);
-	        }		    
-	        logger.info("========= Test FlatMap END ===========");
+//		    logger.info("========= Test FlatMap BEGIN ===========");
+//		    // Collect RDD for printing
+//	        for(String word : words.collect()){
+//	            logger.info(word);
+//	        }		    
+//	        logger.info("========= Test FlatMap END ===========");
 	        
 	        Map<String, Long> wordCounts = words.countByValue();
 	        for (Map.Entry<String, Long> entry : wordCounts.entrySet()) {
 	            logger.info(entry.getKey() + " : " + entry.getValue());
 	        }
+	        
+		    JavaPairRDD<String, Integer> ones = words.mapToPair(s -> new Tuple2<>(s, 1));
+		    JavaPairRDD<String, Integer> counts = ones.reduceByKey((i1, i2) -> i1 + i2);
+		    
+		    counts.foreach(data -> {
+		        logger.info("word="+data._1() + " count=" + data._2());
+		    }); 
+		    
 		    
 		} catch (Exception e) {
 			logger.error("Error", e);
