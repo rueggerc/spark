@@ -98,7 +98,7 @@ public class PairTests {
 	}
 	
 	@Test
-	// @Ignore
+	@Ignore
 	public void testConvertToPairRDD() {
 		try {
 			
@@ -120,9 +120,76 @@ public class PairTests {
 	        pairRDD2.coalesce(1).saveAsTextFile("output/pairRDD2.out");
 	        
 	        // Method 3
-	        JavaPairRDD<String,Integer> pairRDD3 = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getValue(s)));
+	        JavaPairRDD<String,Integer> pairRDD3 = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getIntegerValue(s)));
 	        pairRDD3.coalesce(1).saveAsTextFile("output/pairRDD3.out");
 	        
+	        
+	        logger.info("=== CONVERT TO PAIR RDD TEST END");
+			
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+	
+	
+	@Test
+	@Ignore
+	public void testTransformWithFilter() {
+		try {
+			
+			Logger.getLogger("org").setLevel(Level.ERROR);
+			logger.info("=== CONVERT TO PAIR RDD TEST BEGIN");
+			
+	        SparkConf conf = new SparkConf().setAppName("testPairRDD1").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        List<String> inputStrings = Arrays.asList("Jack 12", "Foo 19", "Bar 36", "Captain 9", "Later 12");
+	        JavaRDD<String> regularRDD = sc.parallelize(inputStrings);
+	       
+	        
+	        // Get Pair RDD
+	        JavaPairRDD<String,Integer> pairRDD = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getIntegerValue(s)));
+	        
+	        // Filter out entries where name is not Jack
+	        JavaPairRDD<String,Integer> pairsNotJack = pairRDD.filter(entry -> {
+	        	return !entry._1().equals("Jack");
+	        });
+	        
+	        pairsNotJack.foreach(entry -> {
+	        	logger.info("NextKey=" + entry._1());
+	        });
+	        
+	        
+	        logger.info("=== CONVERT TO PAIR RDD TEST END");
+			
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+	
+	@Test
+	// @Ignore
+	public void testTransformPairValue() {
+		try {
+			
+			Logger.getLogger("org").setLevel(Level.ERROR);
+			logger.info("=== CONVERT TO PAIR RDD TEST BEGIN");
+			
+	        SparkConf conf = new SparkConf().setAppName("testPairRDD1").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        List<String> inputStrings = Arrays.asList("Captain Canine", "Oscar Feline", "Darwin Avian", "Sunny Avian");
+	        JavaRDD<String> regularRDD = sc.parallelize(inputStrings);
+	       
+	        JavaPairRDD<String,String> pairRDD = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getStringValue(s)));
+	        
+	        // Capitalize the Species Name
+	        JavaPairRDD<String,String> pairRDDCaps = pairRDD.mapValues(species -> species.toUpperCase());
+	        pairRDDCaps.foreach(entry -> {
+	        	logger.info("NextValue=" + entry._2());
+	        });
 	        
 	        logger.info("=== CONVERT TO PAIR RDD TEST END");
 			
@@ -145,7 +212,11 @@ public class PairTests {
 		return splits[0];
 		
 	}
-	private static Integer getValue(String entry) {
+	private static String getStringValue(String entry) {
+		String[] splits = entry.split(" ");
+		return splits[1];
+	}
+	private static Integer getIntegerValue(String entry) {
 		String[] splits = entry.split(" ");
 		return Integer.valueOf(splits[1]);
 	}
