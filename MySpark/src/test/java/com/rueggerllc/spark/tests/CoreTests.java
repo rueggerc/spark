@@ -61,14 +61,24 @@ public class CoreTests {
 	
 	@Test
 	// @Ignore
+	public void testSplitLogEntries() {
+		try {
+			logger.info("=== SPLIT LOG ENTRIES BEGIN");
+			String line = "199.72.81.55	-	804571201	GET	/history/apollo/	200	6245";
+			String[] splits = line.split("\\s+");
+			logger.info("Host=" + splits[0]);
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	@Test
+	@Ignore
 	public void testFlatMap() {
 		
 		try {
 			Logger.getLogger("org").setLevel(Level.ERROR);
 			
-			
-			// String[] petsArray = {"Captain Foobar the Later", "Darwin the", "Oscar hey Bud Lets Party"};
-			// List<String> thePets = Arrays.asList(petsArray);
 			List<String> thePets = Arrays.asList("Captain and the Foos", "later Much", "the Dakota", "Foos Oscar");
 			
 		    SparkConf conf = new SparkConf().setAppName("myFlatMap").setMaster("local[2]");
@@ -153,6 +163,7 @@ public class CoreTests {
 	            logger.info(word);
 	        }		    
 	        logger.info("========= Test FlatMap END ===========");
+	        
 	        
 	        Map<String, Long> wordCounts = words.countByValue();
 	        for (Map.Entry<String, Long> entry : wordCounts.entrySet()) {

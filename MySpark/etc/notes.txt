@@ -2,5 +2,34 @@
 
 Streaming
 ---------
-
 nc -lk 9999
+
+
+Submit
+---------
+spark-submit --class com.rueggerllc.spark.apps.MyExampleHDFS ./MySpark.jar
+spark-submit --class com.rueggerllc.spark.apps.MyExampleHDFS --master <master> --deploy-mode <mode> ./MySpark.jar
+
+
+./bin/spark-submit \
+  --class <main-class> \
+  --master <master-url> \
+  --deploy-mode <deploy-mode> \
+  --conf <key>=<value> \
+  ... # other options
+  <application-jar> \
+  [application-arguments]
+  
+  
+CentOS Firewall
+---------------
+systemctl disable firewalld
+systemctl enable firewalld
+systemctl stop firewalld
+systemctl start firewalld
+systemctl status firewalld
+
+
+Remove Hadoop Output
+--------------------
+hdfs dfs -rm -r /my_output

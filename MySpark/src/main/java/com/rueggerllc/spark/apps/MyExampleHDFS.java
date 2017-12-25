@@ -25,8 +25,13 @@ public class MyExampleHDFS {
 //		         .set("spark.akka.heartbeat.interval", "100")
 //		         .set("spark.local.ip", "127.0.0.1");
 	    
-	    SparkConf conf = new SparkConf().setAppName("mySparkHDFS").setMaster("spark://192.168.243.128:7077");
+	    // SparkConf conf = new SparkConf().setAppName("MyExampleHDFS").setMaster("spark://192.168.243.128:7077");
+        SparkConf conf = new SparkConf().setAppName("MyExampleHDFS");
 	    JavaSparkContext sc = new JavaSparkContext(conf);
+	   
+	    logger.info("master=" + conf.get("master"));
+	    logger.info("spark.master=" + conf.get("spark.master"));
+	    
 	    
 	    logger.info("Context Created");
         

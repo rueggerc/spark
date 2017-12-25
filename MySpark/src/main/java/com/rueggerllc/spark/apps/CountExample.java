@@ -19,7 +19,8 @@ public class CountExample {
         
         logger.info("==== CountExample BEGIN ====");
         
-        SparkConf conf = new SparkConf().setAppName("count").setMaster("local[*]");
+        // SparkConf conf = new SparkConf().setAppName("count").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName("CountExample");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
         List<String> inputWords = Arrays.asList("spark", "hadoop", "spark", "hive", "pig", "cassandra", "hadoop");
