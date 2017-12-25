@@ -18,18 +18,14 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class PersistTests {
+public class PairTests {
 
-	private static Logger logger = Logger.getLogger(PersistTests.class);
+	private static Logger logger = Logger.getLogger(PairTests.class);
 
 	private static String WS = "\\s+";
 	
 	// Notes
-	// collect used for unit test/debugging
-	// DO NOT use on large RDD's - entire RDD must fit into memory of driver program!
-	
-	// count
-	// countByValue
+
 	
 	
 	@BeforeClass
@@ -55,48 +51,6 @@ public class PersistTests {
 	}
 	
 	
-	
-	@Test
-	// @Ignore
-	public void testPersist1() {
-		try {
-			
-			Logger.getLogger("org").setLevel(Level.ERROR);
-			logger.info("=== TEST PERSIST1 BEGIN");
-		    SparkConf conf = new SparkConf().setAppName("testPersist1").setMaster("local[*]");
-		    JavaSparkContext sc = new JavaSparkContext(conf);
-		    
-		    List<Integer> integerList = new ArrayList<Integer>();
-		    for (int i = 1; i <= 10; i++) {
-		    	integerList.add(i);
-		    }
-		    JavaRDD<Integer> integerRDD = sc.parallelize(integerList);
-		    
-		    // Persist RDD
-		    // integerRDD.cache();
-		    integerRDD.persist(StorageLevel.MEMORY_ONLY());
-		    // integerRDD.persist(StorageLevel.MEMORY_AND_DISK());
-		    // integerRDD.persist(StorageLevel.MEMORY_ONLY_SER());
-		    // integerRDD.persist(StorageLevel.MEMORY_AND_DISK_SER());
-		    // integerRDD.persist(StorageLevel.DISK_ONLY());
-		    // integerRDD.unpersist();
-		    
-		    
-		    // Now do multiple actions
-		    Integer product = integerRDD.reduce( (x,y) -> x + y);
-		    long count = integerRDD.count();
-		    
-		    logger.info("Product=" + product);
-		    logger.info("Count=" + count);
-		    
-		    logger.info("=== TEST PERSIST1 END");
-			
-
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
-	}
-
 
 	
 	@Test

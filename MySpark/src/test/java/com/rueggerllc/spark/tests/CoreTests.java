@@ -52,6 +52,40 @@ public class CoreTests {
 		logger.info("Dummy Test Begin");
 	}
 	
+	
+	@Test
+	// @Ignore
+	public void testWordCount() {
+		try {
+	        Logger.getLogger("org").setLevel(Level.ERROR);
+	        SparkConf conf = new SparkConf().setAppName("wordCounts").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+
+	        JavaRDD<String> lines = sc.textFile("input/word_count.text");
+	        JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
+
+	        Map<String, Long> wordCounts = words.countByValue();
+	        for (Map.Entry<String, Long> entry : wordCounts.entrySet()) {
+	            System.out.println(entry.getKey() + " : " + entry.getValue());
+	        }
+	        
+	        
+	        logger.info("====== Map Reduce ====");
+		    JavaPairRDD<String, Integer> ones = words.mapToPair(s -> new Tuple2<>(s, 1));
+		    JavaPairRDD<String, Integer> counts = ones.reduceByKey((i1, i2) -> i1 + i2);
+		    
+		    counts.foreach(data -> {
+		        logger.info("word="+data._1() + " count=" + data._2());
+		    }); 
+	        
+	        
+		    
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+
+	
 	@Test
 	@Ignore
 	public void testLamda1() {
@@ -60,7 +94,7 @@ public class CoreTests {
 	}
 	
 	@Test
-	// @Ignore
+	@Ignore
 	public void testSplitLogEntries() {
 		try {
 			logger.info("=== SPLIT LOG ENTRIES BEGIN");
