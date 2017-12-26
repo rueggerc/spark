@@ -170,7 +170,7 @@ public class PairTests {
 	}
 	
 	@Test
-	// @Ignore
+	@Ignore
 	public void testTransformPairValue() {
 		try {
 			
@@ -190,6 +190,34 @@ public class PairTests {
 	        pairRDDCaps.foreach(entry -> {
 	        	logger.info("NextValue=" + entry._2());
 	        });
+	        
+	        logger.info("=== CONVERT TO PAIR RDD TEST END");
+			
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+	
+	@Test
+	// @Ignore
+	public void testReduceByKey() {
+		try {
+			
+			Logger.getLogger("org").setLevel(Level.ERROR);
+			logger.info("=== CONVERT TO PAIR RDD TEST BEGIN");
+			
+	        SparkConf conf = new SparkConf().setAppName("testPairRDD1").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        List<String> inputStrings = Arrays.asList("Red 2", "Blue 5", "Blue 1", "Yellow 3", "Red 7", "Red 1", "Blue 2");
+	        JavaRDD<String> regularRDD = sc.parallelize(inputStrings);
+	       
+	        JavaPairRDD<String,Integer> pairRDD = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getIntegerValue(s)));
+	        
+	        // Reduce By Key
+	        
+	        
 	        
 	        logger.info("=== CONVERT TO PAIR RDD TEST END");
 			
