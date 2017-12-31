@@ -77,7 +77,14 @@ public class AverageHousePrice {
 //	        	logger.info("Bedrooms=" + entry._1() + " AveragePrice=" + entry._2);
 //	        });	
 	        
-	        averagePrices.saveAsTextFile("hdfs://captain:9000/outputs/RealEstate");
+	        // Sort
+	        JavaPairRDD<Integer,String> sortedAveragePrices = averagePrices.sortByKey();
+	        sortedAveragePrices.foreach(entry -> {
+	        	logger.info("Bedrooms=" + entry._1() + " AveragePrice=" + entry._2);
+	        });	
+	        
+	        // Save
+	        sortedAveragePrices.saveAsTextFile("hdfs://captain:9000/outputs/RealEstate");
 	        
 	        if (sc != null) {
 	        	sc.close();
