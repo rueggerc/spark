@@ -27,7 +27,8 @@ public class WordCount {
 	    // logger.info("spark.master=" + conf.get("spark.master"));
 	    logger.info("Context Created");
         
-	    JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/word_count.text");
+	    // JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/word_count.text");
+	    JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/constitution.txt");
 	    JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
 	    
 	    JavaPairRDD<String, Integer> ones = words.mapToPair(s -> new Tuple2<>(s, 1));

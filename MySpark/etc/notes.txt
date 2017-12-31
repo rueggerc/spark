@@ -1,4 +1,12 @@
 
+UI Ports
+=========
+Yarn 8088
+NameNode 50070
+Spark 8080
+
+
+
 
 Streaming
 ---------
