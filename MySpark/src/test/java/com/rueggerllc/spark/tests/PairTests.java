@@ -3,6 +3,7 @@ package com.rueggerllc.spark.tests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,6 +20,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.rueggerllc.spark.beans.AveragePriceBean;
+
 import scala.Tuple2;
 
 public class PairTests {
@@ -25,11 +29,9 @@ public class PairTests {
 	private static Logger logger = Logger.getLogger(PairTests.class);
 
 	private static String WS = "\\s+";
+	public static final String COMMA_DELIMITER = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
 	
-	// Notes
 
-	
-	
 	@BeforeClass
 	public static void setupClass() throws Exception {
 	}
@@ -199,33 +201,137 @@ public class PairTests {
 		}
 	}
 	
+//	@Test
+//	// @Ignore
+//	public void testReduceByKey() {
+//		try {
+//			
+//			Logger.getLogger("org").setLevel(Level.ERROR);
+//			logger.info("=== CONVERT TO PAIR RDD TEST BEGIN");
+//			
+//	        SparkConf conf = new SparkConf().setAppName("testPairRDD1").setMaster("local[*]");
+//	        JavaSparkContext sc = new JavaSparkContext(conf);
+//	        
+//	        List<String> inputStrings = Arrays.asList("Red 2", "Blue 5", "Blue 1", "Yellow 3", "Red 7", "Red 1", "Blue 2");
+//	        JavaRDD<String> regularRDD = sc.parallelize(inputStrings);
+//	       
+//	        JavaPairRDD<String,Integer> pairRDD = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getIntegerValue(s)));
+//	        
+//	        // Reduce By Key
+//	        
+//	        
+//	        
+//	        logger.info("=== CONVERT TO PAIR RDD TEST END");
+//			
+//
+//		} catch (Exception e) {
+//			logger.error("Error", e);
+//		}
+//	}
+	
 	@Test
-	// @Ignore
+	@Ignore
 	public void testReduceByKey() {
 		try {
-			
-			Logger.getLogger("org").setLevel(Level.ERROR);
-			logger.info("=== CONVERT TO PAIR RDD TEST BEGIN");
-			
-	        SparkConf conf = new SparkConf().setAppName("testPairRDD1").setMaster("local[*]");
+	        Logger.getLogger("org").setLevel(Level.ERROR);
+	        SparkConf conf = new SparkConf().setAppName("wordCounts").setMaster("local[*]");
 	        JavaSparkContext sc = new JavaSparkContext(conf);
-	        
-	        List<String> inputStrings = Arrays.asList("Red 2", "Blue 5", "Blue 1", "Yellow 3", "Red 7", "Red 1", "Blue 2");
-	        JavaRDD<String> regularRDD = sc.parallelize(inputStrings);
-	       
-	        JavaPairRDD<String,Integer> pairRDD = regularRDD.mapToPair(s->new Tuple2<>(getKey(s), getIntegerValue(s)));
-	        
-	        // Reduce By Key
-	        
-	        
-	        
-	        logger.info("=== CONVERT TO PAIR RDD TEST END");
-			
 
+	        JavaRDD<String> lines = sc.textFile("input/pets.txt");
+	        JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
+
+	        JavaPairRDD<String, Integer> wordPairRdd = 
+	        		words.mapToPair((PairFunction<String, String, Integer>) word -> new Tuple2<>(word, 1));
+	        JavaPairRDD<String, Integer> wordCounts = 
+	        		wordPairRdd.reduceByKey((Function2<Integer, Integer, Integer>) (x, y) -> x + y);
+
+	        Map<String, Integer> worldCountsMap = wordCounts.collectAsMap();
+	        for (Map.Entry<String, Integer> wordCountPair : worldCountsMap.entrySet()) {
+	            logger.info(wordCountPair.getKey() + " : " + wordCountPair.getValue());
+	        }
+	        
+	        if (sc != null) {
+	        	sc.close();
+	        }
+
+	        
+		    
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
 	}
+	
+	@Test
+	// @Ignore
+	//
+	// Data Format
+	// 0:UniqueID
+	// 1:Location
+	// 2:Price
+	// 3:Number of Bedrooms
+	// 4:Number of Bathrooms
+	// 5:Square Feet
+	// 6:Price Per Square Foot
+	// 7:State of Sale
+	//
+	// Sample:
+	// 132842,Arroyo Grande,795000.00,3,3,2371,335.30,Short Sale
+	//
+	// Problem:
+	// Output the average price for houses with different number of Bedrooms
+	// Average Price for 3 Bedroom House
+	// Average Price for 2 Bedroom House
+	// Average Price for 1 Bedroom House
+	public void testAverageHousePrice() {
+		try {
+	        Logger.getLogger("org").setLevel(Level.ERROR);
+	        SparkConf conf = new SparkConf().setAppName("averageHousePrice").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        // Get input Data
+	        JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/RealEstate.csv");
+
+	        // Filter out Header
+	        // JavaRDD<String> lines = sc.textFile("input/RealEstate.csv");
+	        lines = lines.filter(line -> filterRealEstateLines(line));
+	        
+	        // Create Mapping:
+	        // # Bedrooms -> (1, price)
+	        JavaPairRDD<Integer, AveragePriceBean> averagePriceBeans = lines.mapToPair(
+	        		line -> new Tuple2<>(getNumberOfBedrooms(line), new AveragePriceBean(1, getPrice(line)))
+	        );
+	        
+	        // Reduce By Number of Bedrooms
+	        // Sum up Average Price Beans for each key
+	        JavaPairRDD<Integer, AveragePriceBean> averagePriceTotals = 
+	        		averagePriceBeans.reduceByKey( (x,y) -> new AveragePriceBean(x.getCount() + y.getCount(), x.getTotal() + y.getTotal()));
+	     
+	        // Diagnostics
+//	        averagePriceTotals.foreach(entry -> {
+//	        	logger.info("Bedrooms=" + entry._1() + " AveragePriceBean=" + entry._2);
+//	        });
+	        
+	        // Compute Average Price for each entry
+	        JavaPairRDD<Integer,String> averagePrices = 
+	        		averagePriceTotals.mapValues(averagePriceBean -> String.valueOf(averagePriceBean.computeAverage()));
+	               
+	        averagePrices.foreach(entry -> {
+	        	logger.info("Bedrooms=" + entry._1() + " AveragePrice=" + entry._2);
+	        });	
+	        
+	        averagePrices.saveAsTextFile("hdfs://captain:9000/outputs/RealEstate");
+	        
+	        if (sc != null) {
+	        	sc.close();
+	        }
+
+	        
+		    
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+	
 	
 	// PairFunction<T, K, V>
 	// T=type in input RDD
@@ -238,7 +344,6 @@ public class PairTests {
 	private static String getKey(String entry) {
 		String[] splits = entry.split(" ");
 		return splits[0];
-		
 	}
 	private static String getStringValue(String entry) {
 		String[] splits = entry.split(" ");
@@ -249,6 +354,22 @@ public class PairTests {
 		return Integer.valueOf(splits[1]);
 	}
 	
+	private static Integer getNumberOfBedrooms(String entry) {
+		String[] splits = entry.split(COMMA_DELIMITER);
+		Integer bedrooms = Integer.valueOf(splits[3]);
+		return bedrooms;
+	}
+	private static Double getPrice(String entry) {
+		String[] splits = entry.split(COMMA_DELIMITER);
+		return Double.valueOf(splits[2]);
+	}
+	
+	private static boolean filterRealEstateLines(String line) {
+		if (line.trim().equals("")) {
+			return false;
+		}
+		return !(line.split(COMMA_DELIMITER)[0].equals("MLS"));
+	}
 	
 	
 }

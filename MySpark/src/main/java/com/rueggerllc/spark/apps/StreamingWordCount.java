@@ -32,6 +32,7 @@ public class StreamingWordCount {
 
 	    if (args.length < 2) {
 	    	System.err.println("Usage: StreamingWordCount <hostname> <port>");
+	    	logger.error("Usage: StreamingWordCount <hostname> <port>");
 	    	System.exit(1);
 	    }
 	    
@@ -56,6 +57,8 @@ public class StreamingWordCount {
 	    JavaDStream<String> words = lines.flatMap(x -> Arrays.asList(SPACE.split(x)).iterator());
 	    JavaPairDStream<String, Integer> wordCounts = words.mapToPair(s -> new Tuple2<>(s, 1)).reduceByKey((i1, i2) -> i1 + i2);
 
+	    // wordCounts.foreachRDD(foreachFunc);
+	    
 	    wordCounts.print();
 	    ssc.start();
 	    ssc.awaitTermination();

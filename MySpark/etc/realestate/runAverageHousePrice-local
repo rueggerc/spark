@@ -1,0 +1,14 @@
+#!/bin/bash
+MASTER=local[*]
+JAR_FILE=/home/hadoop/code/spark/MySpark/build/libs/MySpark.jar
+
+# Remove output
+hdfs dfs -rm -r /outputs/RealEstate
+rm -rf ./Output
+
+# Submit
+spark-submit --class com.rueggerllc.spark.apps.AverageHousePrice --master $MASTER $JAR_FILE $*
+
+# Get Output
+hdfs dfs -get /outputs/RealEstate ./Output
+cat ./Output/part*
