@@ -1,0 +1,7 @@
+#!/bin/bash
+MASTER=local[*]
+JAR_FILE=/home/hadoop/code/spark/MySpark/build/libs/MySpark.jar
+
+# Submit
+spark-submit --class com.rueggerllc.spark.apps.StackOverflowSurvey --master $MASTER $JAR_FILE $*
+

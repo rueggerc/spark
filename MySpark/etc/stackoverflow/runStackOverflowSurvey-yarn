@@ -1,0 +1,8 @@
+#!/bin/bash
+MASTER=yarn
+DEPLOY_MODE=cluster
+JAR_FILE=/home/hadoop/code/spark/MySpark/build/libs/MySpark.jar
+
+# Submit
+spark-submit --class com.rueggerllc.spark.apps.StackOverflowSurvey --master $MASTER --deploy-mode $DEPLOY_MODE $JAR_FILE $*
+

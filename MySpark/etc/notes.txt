@@ -5,6 +5,12 @@ Yarn 8088
 NameNode 50070
 Spark 8080
 
+Copy Local File to/from HDFS
+-----------------------
+hdfs dfs -put <filename> /inputs
+hdfs dfs -get /outputs/RealEstate ./Output
+hdfs dfs -rm -r /ouputs/WordCount
+
 
 Netstat
 -------
