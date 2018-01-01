@@ -134,6 +134,73 @@ public class PairTests {
 		}
 	}
 	
+	@Test
+	@Ignore
+	public void testSortByKey() {
+		try {
+			Logger.getLogger("org").setLevel(Level.ERROR);
+	        SparkConf conf = new SparkConf().setAppName("testSortByKey").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        List<Tuple2<Integer,String>> priorityNameList = new ArrayList<Tuple2<Integer,String>>();
+	        priorityNameList.add(new Tuple2<>(42, "Chris"));
+	        priorityNameList.add(new Tuple2<>(12, "Keys"));
+	        priorityNameList.add(new Tuple2<>(11, "Grant"));
+	        priorityNameList.add(new Tuple2<>(3, "Captain"));
+	        JavaPairRDD<Integer, String> priorityNameRDD = sc.parallelizePairs(priorityNameList);
+
+	        JavaPairRDD<Integer, String> sortedPriorityNameRDD = priorityNameRDD.sortByKey();
+	        logger.info("Sorted Key/Values BEGIN");
+	        for (Tuple2<Integer,String> names : sortedPriorityNameRDD.collect()) {
+	        	logger.info(names._1() + ":" + names._2());
+	        }
+	        logger.info("Sorted Key/Values END");
+	        
+	        logger.info("Map BEGIN");
+	        Map<Integer, String> sortedMap = sortedPriorityNameRDD.collectAsMap();
+	        for (Map.Entry<Integer, String> nextEntry : sortedMap.entrySet()) {
+	        	logger.info(nextEntry.getKey() + " : " + nextEntry.getValue());
+	        }
+	       
+	        logger.info("Map END");
+	        
+			
+		} catch (Exception e) {
+			logger.error("ERROR", e);
+		}
+	}
+	
+	@Test
+	// @Ignore
+	public void testWordCountDescendingOrder() {
+		try {
+			Logger.getLogger("org").setLevel(Level.ERROR);
+	        SparkConf conf = new SparkConf().setAppName("testWordCountDescendingOrder").setMaster("local[*]");
+	        JavaSparkContext sc = new JavaSparkContext(conf);
+	        
+	        JavaRDD<String> lines = sc.textFile("input/word_count.text");
+	        JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
+		    JavaPairRDD<String, Integer> wordToOneRDD = words.mapToPair(s -> new Tuple2<>(s, 1));
+		    JavaPairRDD<String, Integer> wordCountPairRDD = wordToOneRDD.reduceByKey((count1, count2) -> count1 + count2);
+		    
+		    // Flip to Integer:String and sort
+		    JavaPairRDD<Integer, String> countToWordPairs = wordCountPairRDD.mapToPair(tuple -> new Tuple2<>(tuple._2(), tuple._1()));
+		    JavaPairRDD<Integer, String> sortedCountToWordPairs = countToWordPairs.sortByKey(false);
+	        
+	        // Flip Back to String:Integer
+	        JavaPairRDD<String, Integer> sortedWordToCountRDD = sortedCountToWordPairs.mapToPair(tuple -> new Tuple2<>(tuple._2(), tuple._1()));
+		    
+	        // Output
+	        logger.info("Word ==> Count Descending BEGIN");
+	        for (Tuple2<String,Integer> entry : sortedWordToCountRDD.collect()) {
+	        	logger.info(entry._1() + ":" + entry._2());
+	        }
+			
+		} catch (Exception e) {
+			logger.error("ERROR", e);
+		}
+	}
+	
 	
 	@Test
 	@Ignore
@@ -262,7 +329,7 @@ public class PairTests {
 	}
 	
 	@Test
-	// @Ignore
+	@Ignore
 	//
 	// Data Format
 	// 0:UniqueID
@@ -331,6 +398,9 @@ public class PairTests {
 			logger.error("Error", e);
 		}
 	}
+	
+
+	
 	
 	
 	// PairFunction<T, K, V>
