@@ -16,9 +16,9 @@ import org.junit.Test;
 
 import scala.Option;
 
-public class AccumulatorTests {
+public class BroadcastVariableTests {
 
-	private static Logger logger = Logger.getLogger(AccumulatorTests.class);
+	private static Logger logger = Logger.getLogger(BroadcastVariableTests.class);
 
 	private static String WS = "\\s+";
 	public static final String COMMA_DELIMITER = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";

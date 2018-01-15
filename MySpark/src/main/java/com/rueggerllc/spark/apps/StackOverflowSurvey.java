@@ -33,16 +33,21 @@ public class StackOverflowSurvey {
 	        final LongAccumulator total = new LongAccumulator();
 	        final LongAccumulator missingSalaryMidPoint = new LongAccumulator();
 	        final LongAccumulator totalFromCanada = new LongAccumulator();
+	        final LongAccumulator totalBytesProcessed = new LongAccumulator();
 
 	        total.register(sparkContext, Option.apply("total"), false);
 	        totalFromCanada.register(sparkContext, Option.apply("total From Canada"), false);
 	        missingSalaryMidPoint.register(sparkContext, Option.apply("missing salary middle point"), false);
+	        totalBytesProcessed.register(sparkContext, Option.apply("total Bytes Processed"), false);
 
 	        JavaRDD<String> responseRDD = javaSparkContext.textFile("hdfs://captain:9000/inputs/2016-stack-overflow-survey-responses.csv");
 	        JavaRDD<String> processedRDD = responseRDD.filter(response -> {
 	            String[] splits = response.split(COMMA_DELIMITER, -1);
 
 	            total.add(1);
+	            
+	            // Get total # of bytes
+	            totalBytesProcessed.add(response.getBytes().length);
 
 	            if (splits[14].isEmpty()) {
 	                missingSalaryMidPoint.add(1);
