@@ -2,7 +2,9 @@
 <classpath>
 	<classpathentry path="bin" kind="output"/>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
 	<classpathentry sourcepath="/home/hadoop/.gradle/caches/modules-2/files-2.1/org.apache.spark/spark-core_2.10/2.0.0/7cf99efaa5e3029e138cf8d73a3759bc5d7e7e16/spark-core_2.10-2.0.0-sources.jar" kind="lib" path="/home/hadoop/.gradle/caches/modules-2/files-2.1/org.apache.spark/spark-core_2.10/2.0.0/fa5a3b1dcec12a89b91592bf835054c5bd1fa688/spark-core_2.10-2.0.0.jar"/>
 	<classpathentry sourcepath="/home/hadoop/.gradle/caches/modules-2/files-2.1/org.apache.spark/spark-streaming_2.11/2.2.0/15fb975e7a2e0cabafb71f4c01029f15b2f8738f/spark-streaming_2.11-2.2.0-sources.jar" kind="lib" path="/home/hadoop/.gradle/caches/modules-2/files-2.1/org.apache.spark/spark-streaming_2.11/2.2.0/336cc5c714c6e5c45db9876dad243d8831116216/spark-streaming_2.11-2.2.0.jar"/>
