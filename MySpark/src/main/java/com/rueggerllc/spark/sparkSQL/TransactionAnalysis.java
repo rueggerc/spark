@@ -36,6 +36,7 @@ public class TransactionAnalysis {
         getTotalForName(transactions, "SHRINERS");
         getTotalForName(transactions, "ST JUDE");
         getTotalForName(transactions, "PVA");
+        getTotalForName(transactions, "ANTHEM");
         
 
  /*       // All types start out as Strings in inferred schema
