@@ -74,18 +74,15 @@ public class TransactionAnalysis {
     
     
     private static void getTotalForName(Dataset<Row> transactions, String name) {
-        // System.out.println("=== First 20 records===");
-        // transactions.show(20);
-        // System.out.println("=== First 20 records END ===");
-        
+  
         // SELECT Date, Name, abs(double(amount)) WHERE Name startsWith(name)
         System.out.println("Get TXNS For: " + name);
-        Dataset<Row> smileTrainTXNs = transactions.filter(col("Name").startsWith(name)).withColumn("RealAmount", abs(col("amount").cast("double")));
-        smileTrainTXNs = smileTrainTXNs.select(col("Date"), col("Name"), col("RealAmount"));
-        smileTrainTXNs.show();
+        Dataset<Row> selectedTXNs = transactions.filter(col("Name").startsWith(name)).withColumn("RealAmount", abs(col("amount").cast("double")));
+        selectedTXNs = selectedTXNs.select(col("Date"), col("Name"), col("RealAmount"));
+        selectedTXNs.show();
         
         // SELECT sum("RealAmount")
-        smileTrainTXNs.agg(sum("RealAmount")).show();
+        selectedTXNs.agg(sum("RealAmount")).show();
         
         
         // SELECT sum(RealAmount)
