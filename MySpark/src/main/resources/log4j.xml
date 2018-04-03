@@ -27,7 +27,6 @@
 
 	<root>
 		<priority value="info" />
-		<appender-ref ref="ASYNC" />
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </log4j:configuration>
