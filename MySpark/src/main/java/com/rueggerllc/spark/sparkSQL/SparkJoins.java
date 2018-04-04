@@ -50,9 +50,27 @@ public class SparkJoins {
         Dataset<Row> nameAgeTable = dataFrameReader.option("header","true").csv("input/name_age.csv");
         Dataset<Row> nameCountryTable = dataFrameReader.option("header","true").csv("input/name_country.csv");
         
+        nameAgeTable.coalesce(1).write()
+        .format("com.databricks.spark.csv")
+        .option("header", "true")
+        .save("output/nameage");   
+        
         // Inner Join
         EmployeeJoiner employeeJoiner = new EmployeeJoiner();
-        employeeJoiner.innerJoin(nameAgeTable, nameCountryTable);
+        Dataset<Row> result = employeeJoiner.innerJoin(nameAgeTable, nameCountryTable);
+        result.show(10);
+        
+//        result.coalesce(1).write()
+//        .format("com.databricks.spark.csv")
+//        .option("header", "true")
+//        .save("output/join");   
+        
+       
+        
+//        result.write()
+//        .format("com.databricks.spark.csv")
+//        .option("header", "true")
+//        .text("output/joined.csv");        
         
         session.stop();
     }

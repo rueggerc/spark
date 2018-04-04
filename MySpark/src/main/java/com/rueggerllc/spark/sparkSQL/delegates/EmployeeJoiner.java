@@ -1,10 +1,10 @@
 package com.rueggerllc.spark.sparkSQL.delegates;
 
-import static org.apache.spark.sql.functions.col;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+
+import scala.collection.Seq;
 
 public class EmployeeJoiner {
 	
@@ -16,7 +16,7 @@ public class EmployeeJoiner {
 	 * requires that keys are available in both tables
 	 * nameAgeTable.col("name").equals((nameCountryTable).col("name")),
 	 */
-	public void innerJoin(Dataset<Row> nameAgeTable, Dataset<Row> nameCountryTable) {
+	public Dataset<Row> innerJoin(Dataset<Row> nameAgeTable, Dataset<Row> nameCountryTable) throws Exception {
 		try {
 
 			logger.info("INNER JOIN BEGIN");
@@ -35,11 +35,19 @@ public class EmployeeJoiner {
 	        	nameAgeTable.join(nameCountryTable,
 	        					  nameAgeTable.col("name").equalTo((nameCountryTable).col("name")),
 	        				      INNER_JOIN);
-	        joined.show(10);	        
+	        
+	        String[] columns = joined.columns();
+	        for (String next : columns) {
+	        	logger.info("NEXT COLUMN=" + next);
+	        }
+	        return joined;
+	        
+	     
 	        
 	        			
 		} catch (Exception e) {
 			logger.error("ERROR", e);
+			throw e;
 		}
 	}
 	
