@@ -24,7 +24,7 @@ public class TransactionAnalysis {
         System.out.println("================ SPARK SQL BEGIN ===============");
         
         SparkSession session = SparkSession.builder().appName("TransactionAnalysis").master("local[*]").getOrCreate();
-        // SparkSession session = SparkSession.builder().appName("PetAnalysis").getOrCreate();
+        // SparkSession session = SparkSession.builder().appName("TransactionAnalysis").getOrCreate();
 
         DataFrameReader dataFrameReader = session.read();
 
@@ -39,35 +39,6 @@ public class TransactionAnalysis {
         getTotalForName(transactions, "ANTHEM");
         
 
- /*       // All types start out as Strings in inferred schema
-        System.out.println("=== Inferred Schema BEGIN ===");
-        transactions.printSchema();
-        System.out.println("=== Inferred Schema END ===");
-
-        // System.out.println("=== First 20 records===");
-        // transactions.show(20);
-        // System.out.println("=== First 20 records END ===");
-        
-        // SELECT Date, Name, abs(double(amount)) WHERE Name startsWith('SMILE TRAIN')
-        System.out.println("=== Get SMILE TRAIN ===");
-        Dataset<Row> smileTrainTXNs = transactions.filter(col("Name").startsWith("SMILE TRAIN")).withColumn("RealAmount", abs(col("amount").cast("double")));
-        // smileTrainTXNs = smileTrainTXNs.select(col("Date"), col("Name"), abs(col("RealAmount")));
-        smileTrainTXNs = smileTrainTXNs.select(col("Date"), col("Name"), col("RealAmount"));
-        smileTrainTXNs.show();
-        
-        
-        // smileTrainTXNs = smileTrainTXNs.withColumn("RealAmount", col("amount").cast("double"));
-        // smileTrainTXNs = smileTrainTXNs.withColumn("RealAmount", abs());
-        
-        
-        // SELECT sum("RealAmount")
-        smileTrainTXNs.agg(sum("RealAmount")).show();
-        
-        
-        // SELECT sum(RealAmount)
-        // RelationalGroupedDataset txnsByName = smileTrainTXNs.groupBy("Name");
-        // txnsByName.agg(sum("RealAmount")).show();
-*/        
         
         session.stop();
     }

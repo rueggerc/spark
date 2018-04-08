@@ -17,8 +17,8 @@ public class PetAnalysis {
         
         System.out.println("================ SPARK SQL BEGIN ===============");
         
-        // SparkSession session = SparkSession.builder().appName("SalarySurvey").master("local[*]").getOrCreate();
-        SparkSession session = SparkSession.builder().appName("PetAnalysis").getOrCreate();
+        SparkSession session = SparkSession.builder().appName("SalarySurvey").master("local[*]").getOrCreate();
+        // SparkSession session = SparkSession.builder().appName("PetAnalysis").getOrCreate();
 
         DataFrameReader dataFrameReader = session.read();
 
@@ -38,11 +38,15 @@ public class PetAnalysis {
         System.out.println("=== Species and Weight ===");
         pets.select(col("species"),  col("weight")).show();
 
-        // SELECT * WHERE species='canine'
+        // SELECT * 
+        // FROM pets
+        // WHERE species='canine'
         System.out.println("=== Display Canines ===");
         pets.filter(col("species").equalTo("canine")).show();
 
-        // SELECT COUNT(*), GROUP BY SPECIES
+        // SELECT COUNT(*)
+        // FROM pets
+        // GROUP BY SPECIES
         System.out.println("=== Print the Count of Species ===");
         RelationalGroupedDataset groupedDataset = pets.groupBy(col("species"));
         groupedDataset.count().show();
