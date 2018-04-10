@@ -32,8 +32,8 @@ public class StreamingWordCount {
         
         logger.info("==== StreamingWordCount BEGIN ====");
         
-        SparkConf conf = new SparkConf().setAppName("StreamingWordCount");
-	    JavaSparkContext sc = new JavaSparkContext(conf);
+        // SparkConf conf = new SparkConf().setAppName("StreamingWordCount");
+	    // JavaSparkContext sc = new JavaSparkContext(conf);
 	   
 
 	    if (args.length < 2) {
@@ -52,7 +52,7 @@ public class StreamingWordCount {
 	    SparkConf sparkConf = new SparkConf().setAppName("StreamingWorCount");
 	    sparkConf.set("spark.driver.allowMultipleContexts","true");
 	    sparkConf.set("spark.streaming.stopGracefullyOnShutdown","true");
-	    JavaStreamingContext ssc = new JavaStreamingContext(sparkConf, new Duration(5000));
+	    JavaStreamingContext ssc = new JavaStreamingContext(sparkConf, new Duration(1000));
 
 	    // DStream: 
 	    // Create a JavaReceiverInputDStream on target ip:port and count the
@@ -67,7 +67,8 @@ public class StreamingWordCount {
 	    // wordCounts.foreachRDD(foreachFunc);
 	    
 	    // Display Output
-	    wordCounts.print();
+	    wordCounts.print(20);
+	    //wordCounts.print();
 	    
 	    // Start Program
 	    ssc.start();
