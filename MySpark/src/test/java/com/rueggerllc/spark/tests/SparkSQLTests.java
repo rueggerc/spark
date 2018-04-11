@@ -1,19 +1,19 @@
 package com.rueggerllc.spark.tests;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
+import static org.apache.spark.sql.functions.avg;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.max;
+import static org.apache.spark.sql.functions.sum;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,12 +21,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.rueggerllc.spark.beans.Foo;
-import com.rueggerllc.spark.functions.MyMappingFunction;
 import com.rueggerllc.spark.sparkSQL.delegates.EmployeeJoiner;
-import com.rueggerllc.spark.utils.Utils;
-
-import scala.math.BigDecimal;
 
 public class SparkSQLTests {
 
@@ -56,7 +51,8 @@ public class SparkSQLTests {
 	}
 	
 	@Test
-	public void testBasic() {
+	@Ignore
+	public void testBasicCSV() {
 		try {
 			
 			Logger.getLogger("org").setLevel(Level.ERROR);
@@ -82,6 +78,55 @@ public class SparkSQLTests {
 		} catch (Exception e) {
 			logger.error("ERROR", e);
 		}
+	}
+
+	
+	@Test
+	// @Ignore
+	public void testReadJSON() {
+		try {
+			
+			Logger.getLogger("org").setLevel(Level.ERROR);
+			System.out.println("================ SPARK SQL BEGIN ===============");
+			SparkSession session = SparkSession.builder().appName("SparkSQLTests").master("local[*]").getOrCreate();
+			DataFrameReader dataFrameReader = session.read();
+
+			// Create Data Frame
+			Dataset<Row> pets = dataFrameReader.schema(buildSchema()).json("input/pets.json");
+			
+			// Schema
+			pets.printSchema();
+			pets.show(10);
+		    
+	        // SELECT * 
+	        // FROM pets
+	        // WHERE species='canine'
+	        System.out.println("=== Display Canines ===");
+	        pets.filter(col("species").equalTo("canine")).show();
+
+			// SELECT avg(weight)
+	        // FROM pets
+	        pets.agg(sum("weight")).show();
+	        
+	        pets.agg(avg("weight")).show();
+	        
+	        
+			session.stop();
+		        
+		} catch (Exception e) {
+			logger.error("ERROR", e);
+		}
+	}
+	
+	private static StructType buildSchema() {
+	    StructType schema = new StructType(
+	        new StructField[] {
+	        	DataTypes.createStructField("id", DataTypes.IntegerType, false),
+	            DataTypes.createStructField("species", DataTypes.StringType, false),
+	            DataTypes.createStructField("color", DataTypes.StringType, false),
+	            DataTypes.createStructField("weight", DataTypes.DoubleType, false),
+	            DataTypes.createStructField("name", DataTypes.StringType, false)});
+	    return (schema);
 	}
 
 	
