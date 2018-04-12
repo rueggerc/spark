@@ -1,0 +1,6 @@
+#!/bin/bash
+MASTER=spark://captain:7077
+JAR_FILE=/home/hadoop/code/spark/SparkStreaming/build/libs/SparkStreaming.jar
+
+# Submit
+spark-submit --class com.rueggerllc.spark.streaming.StreamingWordCount --master $MASTER $JAR_FILE $*

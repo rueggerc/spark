@@ -31,9 +31,7 @@ public class KafkaConsumer {
             String topics = "ticker-topic";
 
             // Create context with a 2 seconds batch interval
-            SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafka")
-                    .setMaster("local[1]")
-                    ;
+            SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafka");
             JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(2));
 
             Set<String> topicsSet = new HashSet<>(Arrays.asList(topics.split(",")));
