@@ -6,24 +6,32 @@ repositories {
 }
 
 dependencies {
- 	compile 'org.apache.spark:spark-core_2.10:2.0.0'
- 	compile 'org.apache.spark:spark-streaming_2.11:2.2.0'
- 	compile 'org.apache.spark:spark-streaming-kafka_2.11:1.6.3'
+ 	compileOnly 'org.apache.spark:spark-core_2.10:2.0.0'
+ 	compileOnly 'org.apache.spark:spark-streaming_2.11:2.2.0'
+ 	// compile 'org.apache.spark:spark-streaming-kafka_2.11:1.6.3'
+ 	compile 'org.apache.spark:spark-streaming-kafka-0-10_2.11:2.1.0'
    	compile 'log4j:log4j:1.2.17'
 	testCompile 'junit:junit:4.12'
 }
 
-// Fat Jar with all dependencies
 version = '1.0'
-task fatJar(type: Jar) {
-	zip64=true
-	manifest {
-        attributes 'Main-Class': 'com.rueggerllc.spark.streaming.KafkaConsumer',
-                   'Implementation-Title': 'SparkStreaming', 
-                   'Implementation-Version': version
+jar {
+    zip64 true
+    baseName = project.name + '-fat'
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
     }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    
+    manifest {
+    	attributes 'Implementation-Title': 'SparkStreamingFatJar', 
+        	       'Implementation-Version': version
+    }
+    
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+
 }
+
 

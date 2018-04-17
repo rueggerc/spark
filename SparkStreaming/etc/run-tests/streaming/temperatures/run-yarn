@@ -1,0 +1,8 @@
+#!/bin/bash
+MASTER=yarn
+DEPLOY_MODE=cluster
+APP=com.rueggerllc.spark.streaming.TemperatureConsumer
+JAR_FILE=/home/hadoop/code/spark/SparkStreaming/build/libs/SparkStreaming-fat-1.0.jar
+
+# Submit
+spark-submit --class $APP --master $MASTER --deploy-mode $DEPLOY_MODE $JAR_FILE $*

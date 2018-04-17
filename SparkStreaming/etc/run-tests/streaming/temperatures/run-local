@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MASTER=local[*]
-APP=com.rueggerllc.spark.streaming.TickerConsumer
+APP=com.rueggerllc.spark.streaming.TemperatureConsumer
 FATJARFILE=/home/hadoop/code/spark/SparkStreaming/build/libs/SparkStreaming-fat-1.0.jar
 
 # Submit

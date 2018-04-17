@@ -1,7 +1,10 @@
 package com.rueggerllc.spark.tests;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -52,9 +55,20 @@ public class CoreTests {
 		logger.info("Dummy Test Begin");
 	}
 	
-	
 	@Test
 	// @Ignore
+	public void testGetTimeStamp() {
+		logger.info("NOW=" + getNow());
+	}
+	
+	private String getNow() {
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		Date now = Calendar.getInstance().getTime();
+		return format.format(now);
+	}
+	
+	@Test
+	@Ignore
 	public void testWordCount() {
 		try {
 	        Logger.getLogger("org").setLevel(Level.ERROR);

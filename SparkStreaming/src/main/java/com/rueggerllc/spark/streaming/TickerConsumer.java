@@ -28,9 +28,9 @@ import org.apache.spark.streaming.kafka010.OffsetRange;
 
 import scala.Tuple2;
 
-public class KafkaConsumer {
+public class TickerConsumer {
 	
-	private static final Logger logger = Logger.getLogger(KafkaConsumer.class);
+	private static final Logger logger = Logger.getLogger(TickerConsumer.class);
 	
 	private static final String BROKERS = "captain:9092,godzilla:9092,darwin:9092,oscar:9092";
 	
@@ -38,60 +38,15 @@ public class KafkaConsumer {
     	executeNew();
     }
     
-//    private static void executeOld() {
-//        Logger.getLogger("org").setLevel(Level.ERROR);
-//        logger.info("==== HERE WE GO Spark Kafka Consumer ====");
-//        try {
-//        	
-//            String topicName = "ticker-topic";
-//        	// String topicName = "dummy-topic";
-//
-//            // Create context with a 2 seconds batch interval
-//            SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
-//            JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(2));
-//
-//            // Topic(s)
-//            Set<String> topicsSet = new HashSet<>(Arrays.asList(topicName));
-//            for (String topic : topicsSet) {
-//            	logger.info("NEXT TOPIC=" + topic);
-//            }
-//            
-//            // Kafka Parameters
-//            Map<String, String> kafkaParams = new HashMap<>();
-//            // kafkaParams.put("metadata.broker.list", BROKERS);
-//            kafkaParams.put("bootstrap.servers", BROKERS);
-//            kafkaParams.put("group.id", "spark-kafka-consumers1");
-//            // kafkaParams.put("auto.offset.reset", "latest");
-//            logger.info("Brokers: " + BROKERS);
-//            
-//            JavaPairInputDStream<String, String> messages =
-//              KafkaUtils.createDirectStream(jssc, 
-//            		                        String.class, 
-//            		                        String.class, 
-//            		                        StringDecoder.class, 
-//            		                        StringDecoder.class, 
-//            		                        kafkaParams, 
-//            		                        topicsSet);
-//
-//            // Force Lazy Evaluation
-//            // logger.info("COUNT=" + messages.count());
-//            messages.print();
-//
-//            // Start the computation
-//            jssc.start();
-//            jssc.awaitTermination();
-//        	
-//        } catch (Exception e) {
-//        	logger.error("ERROR", e);
-//        }
-//    }
+
     
     private static void executeNew() {
         Logger.getLogger("org").setLevel(Level.ERROR);
-        logger.info("==== NEW Spark Kafka Consumer ====");
+        logger.info("====  Ticker Consumer BEGIN ====");
         try {
         	
-            SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
+            SparkConf sparkConf = new SparkConf().setAppName("TickerConsumer");
+            sparkConf.set("spark.streaming.stopGracefullyOnShutdown","true");  
             JavaStreamingContext streamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(2));
             
             // String topicName = "dummy-topic";
@@ -118,19 +73,36 @@ public class KafkaConsumer {
         		  @Override
         		  public void call(JavaRDD<ConsumerRecord<String, String>> rdd) {
         			  
-        			System.out.println("NEXT RDD");
-        	        rdd.foreach(entry -> {
-        	        	System.out.printf("offset = %d, key = %s, value = %s\n", entry.offset(), entry.key(), entry.value());
-        	        });	
         			
-        		    final OffsetRange[] offsetRanges = ((HasOffsetRanges) rdd.rdd()).offsetRanges();
-        		    rdd.foreachPartition(new VoidFunction<Iterator<ConsumerRecord<String, String>>>() {
-        		      @Override
-        		      public void call(Iterator<ConsumerRecord<String, String>> consumerRecords) {
-        		        OffsetRange o = offsetRanges[TaskContext.get().partitionId()];
-        		        System.out.println(o.topic() + " " + o.partition() + " " + o.fromOffset() + " " + o.untilOffset());
-        		      }
-        		    });
+        			
+//        	        rdd.foreach(entry -> {
+//        	        	System.out.printf("offset = %d, key = %s, value = %s\n", entry.offset(), entry.key(), entry.value());
+//        	        });
+        	        
+        	        JavaRDD<String> messageRDD = rdd.map(entry -> entry.value() + " " + entry.timestamp() );
+        	        if (messageRDD.count() > 0) {
+        	        	messageRDD.foreach(entry -> System.out.println(entry));
+        	        	messageRDD.saveAsTextFile("output/spark/tickers");
+        	        } else {
+        	        	System.out.println("EMPTY RDD");
+        	        }
+        	        
+        	        
+//        	        // rdd.saveAsTextFile("hdfs://captain:9000/output/constitution.txt");
+//        	        if (rdd.count() > 0) {
+//        	        	rdd.saveAsTextFile("output/spark/tickers");
+//        	        }
+        	        
+        	        
+        			
+//        		    final OffsetRange[] offsetRanges = ((HasOffsetRanges) rdd.rdd()).offsetRanges();
+//        		    rdd.foreachPartition(new VoidFunction<Iterator<ConsumerRecord<String, String>>>() {
+//        		      @Override
+//        		      public void call(Iterator<ConsumerRecord<String, String>> consumerRecords) {
+//        		        OffsetRange o = offsetRanges[TaskContext.get().partitionId()];
+//        		        System.out.println(o.topic() + " " + o.partition() + " " + o.fromOffset() + " " + o.untilOffset());
+//        		      }
+//        		    });
         		  }
         		});
         	
