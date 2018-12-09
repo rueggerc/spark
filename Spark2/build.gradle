@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 
 repositories {
@@ -6,16 +6,18 @@ repositories {
 }
 
 dependencies {
- 	compileOnly 'org.apache.spark:spark-core_2.10:2.0.0'
- 	compileOnly 'org.apache.spark:spark-streaming_2.11:2.2.0'
+ 	compile 'org.apache.spark:spark-core_2.10:2.0.0'
+ 	compile 'org.apache.spark:spark-streaming_2.10:2.0.0'
    	compile 'log4j:log4j:1.2.17'
 	testCompile 'junit:junit:4.12'
 }
 
+
+// Create a single Jar with all dependencies
 version = '1.0'
 jar {
-    zip64 true
-    baseName = project.name + '-fat'
+ 	zip64 true
+    baseName = project.name + '-all'
     from {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)
@@ -23,13 +25,10 @@ jar {
     }
     
     manifest {
-    	attributes 'Implementation-Title': 'SparkStreamingFatJar', 
-        	       'Implementation-Version': version
+    	attributes 'Implementation-Title': 'Spark1-all-1.0.jar', 
+        	   'Implementation-Version': version
     }
-    
-
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
-
 }
 
 

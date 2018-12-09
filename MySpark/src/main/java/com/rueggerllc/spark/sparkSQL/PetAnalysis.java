@@ -25,7 +25,12 @@ public class PetAnalysis {
         System.out.println("================ READING DATA ===============");
         // Uses Header to infer schema of DataSet instead of providing schema manually.
         // Simplifies things
-        Dataset<Row> pets = dataFrameReader.option("header","true").csv("input/pets.csv");
+        Dataset<Row> pets = 
+        		dataFrameReader
+        		.format("org.apache.spark.csv")
+        		.option("header","true")
+        		.option("inferSchema", true)
+        		.csv("input/pets.csv");
 
         // All types start out as Strings in inferred schema
         System.out.println("=== Print out inferred schema ===");

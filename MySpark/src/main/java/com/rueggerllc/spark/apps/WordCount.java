@@ -20,7 +20,8 @@ public class WordCount {
         
         logger.info("==== WordCount BEGIN ====");
         
-        SparkConf conf = new SparkConf().setAppName("WordCount");
+        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
+        // SparkConf conf = new SparkConf().setAppName("WordCount");
 	    JavaSparkContext sc = new JavaSparkContext(conf);
 	   
 	    // logger.info("master=" + conf.get("master"));

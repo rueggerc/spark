@@ -1,5 +1,5 @@
 id,species,color,weight,name
-311,canine,golden,75,Captain
-928,feline,grey,8,Oscar
-44,avian,green,1,Darwin
-11,avian,yellow,1,Sunny
+311,canine,golden,75.0,Captain
+928,feline,grey,8.0,Oscar
+44,avian,green,1.0,Darwin
+11,avian,yellow,1.0,Sunny
