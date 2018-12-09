@@ -7,7 +7,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
@@ -39,19 +41,34 @@ public class AveragePlayerScorePerTeam {
 	    playerScoresList.add(new Tuple2<String,Double>("TeamA", 1.0));
 	    JavaPairRDD<String,Double> playerScores = sc.parallelizePairs(playerScoresList);
 	    
-	    JavaPairRDD<String,Tuple2<Integer,Double>> averages = playerScores
-	    	.mapToPair(new MyMapFunction())
-	    	.reduceByKey(new TeamTotalReducer());
-	    	// .map(new AverageMapper());
+//	    JavaPairRDD<String,Tuple2<Integer,Double>> averages = playerScores
+//	    	.mapToPair(new MyMapFunction())
+//	    	.reduceByKey(new TeamTotalReducer());
+//	    
+	    JavaRDD<Tuple2<String, Double>> averages = playerScores
+		    	.mapToPair(new MyMapFunction())
+		    	.reduceByKey(new TeamTotalReducer())
+		    	.map(new AnswerMapper());
+	    
+	    
 	    	
 	    // Write To Sink(s)
-	    for (Tuple2<String,Tuple2<Integer,Double>> next : averages.collect()) {
-	    	String team = next._1();
-	    	Integer count = next._2()._1();
-	    	Double total = next._2()._2();
-	    	System.out.println("Team=" + team + " Count=" + count + " Total=" + total);
+	    for (Tuple2<String,Double> next : averages.collect()) {
+	    	System.out.println("TEAM=" + next._1() + " Average Score=" + next._2());
 	    }
-  
+    }
+    
+    private static class AnswerMapper implements Function<Tuple2<String,Tuple2<Integer,Double>>,Tuple2<String,Double>> {
+		@Override
+		public Tuple2<String, Double> call(Tuple2<String, Tuple2<Integer, Double>> teamData) throws Exception {
+			String team = teamData._1();
+			Integer count = teamData._2()._1();
+			Double total = teamData._2()._2();
+			Double average = total/count;
+			Tuple2<String,Double> teamAverageScore = new Tuple2<>(team,average);
+			return teamAverageScore;
+		}
+    	
     }
     
     private static class MyMapFunction implements PairFunction<Tuple2<String,Double>,String,Tuple2<Integer,Double>> {
