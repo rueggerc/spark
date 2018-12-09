@@ -67,7 +67,6 @@ public class WordCount {
 		public Tuple2<String, Integer> call(String word) throws Exception {
 			return new Tuple2<String,Integer>(word,new Integer(1));
 		}
-    	
     }
     
     private static class MyReduceFunction implements Function2<Integer,Integer,Integer> {
