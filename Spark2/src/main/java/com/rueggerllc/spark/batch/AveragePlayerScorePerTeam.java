@@ -50,8 +50,6 @@ public class AveragePlayerScorePerTeam {
 		    	.reduceByKey(new TeamTotalReducer())
 		    	.map(new AnswerMapper());
 	    
-	    
-	    	
 	    // Write To Sink(s)
 	    for (Tuple2<String,Double> next : averages.collect()) {
 	    	System.out.println("TEAM=" + next._1() + " Average Score=" + next._2());
