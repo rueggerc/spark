@@ -20,8 +20,8 @@ public class WordCount {
         
         logger.info("==== WordCount BEGIN ====");
         
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
-        // SparkConf conf = new SparkConf().setAppName("WordCount");
+        // SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName("WordCount");
 	    JavaSparkContext sc = new JavaSparkContext(conf);
 	   
 	    // logger.info("master=" + conf.get("master"));
@@ -29,13 +29,15 @@ public class WordCount {
 	    logger.info("Context Created");
         
 	    // JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/word_count.text");
-	    JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/constitution.txt");
+	    // JavaRDD<String> lines = sc.textFile("hdfs://captain:9000/inputs/constitution.txt");
+	    JavaRDD<String> lines = sc.textFile("input/pets.txt");
 	    JavaRDD<String> words = lines.flatMap(line -> Arrays.asList(line.split(" ")).iterator());
 	    
 	    JavaPairRDD<String, Integer> ones = words.mapToPair(s -> new Tuple2<>(s, 1));
 	    JavaPairRDD<String, Integer> counts = ones.reduceByKey((i1, i2) -> i1 + i2);
         
-		counts.saveAsTextFile("hdfs://captain:9000/outputs/WordCount/");
+		// counts.saveAsTextFile("hdfs://captain:9000/outputs/WordCount/");
+		counts.saveAsTextFile("output/wordCount");
 		
         if (sc != null) {
         	sc.close();

@@ -1,4 +1,4 @@
-package com.rueggerllc.spark.streaming;
+package com.rueggerllc.spark.stream;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,53 +39,6 @@ public class KafkaConsumer {
     	executeNew();
     }
     
-//    private static void executeOld() {
-//        Logger.getLogger("org").setLevel(Level.ERROR);
-//        logger.info("==== HERE WE GO Spark Kafka Consumer ====");
-//        try {
-//        	
-//            String topicName = "ticker-topic";
-//        	// String topicName = "dummy-topic";
-//
-//            // Create context with a 2 seconds batch interval
-//            SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
-//            JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(2));
-//
-//            // Topic(s)
-//            Set<String> topicsSet = new HashSet<>(Arrays.asList(topicName));
-//            for (String topic : topicsSet) {
-//            	logger.info("NEXT TOPIC=" + topic);
-//            }
-//            
-//            // Kafka Parameters
-//            Map<String, String> kafkaParams = new HashMap<>();
-//            // kafkaParams.put("metadata.broker.list", BROKERS);
-//            kafkaParams.put("bootstrap.servers", BROKERS);
-//            kafkaParams.put("group.id", "spark-kafka-consumers1");
-//            // kafkaParams.put("auto.offset.reset", "latest");
-//            logger.info("Brokers: " + BROKERS);
-//            
-//            JavaPairInputDStream<String, String> messages =
-//              KafkaUtils.createDirectStream(jssc, 
-//            		                        String.class, 
-//            		                        String.class, 
-//            		                        StringDecoder.class, 
-//            		                        StringDecoder.class, 
-//            		                        kafkaParams, 
-//            		                        topicsSet);
-//
-//            // Force Lazy Evaluation
-//            // logger.info("COUNT=" + messages.count());
-//            messages.print();
-//
-//            // Start the computation
-//            jssc.start();
-//            jssc.awaitTermination();
-//        	
-//        } catch (Exception e) {
-//        	logger.error("ERROR", e);
-//        }
-//    }
     
     private static void executeNew() {
         Logger.getLogger("org").setLevel(Level.ERROR);
@@ -95,6 +48,7 @@ public class KafkaConsumer {
             SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
             JavaStreamingContext streamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(2));
             
+            // String topicName = "dummy-topic";
             String topicName = "junk";
             Set<String> topics = new HashSet<>(Arrays.asList(topicName));
            
@@ -102,7 +56,7 @@ public class KafkaConsumer {
             kafkaParams.put("bootstrap.servers", BROKERS);
             kafkaParams.put("key.deserializer", StringDeserializer.class);
             kafkaParams.put("value.deserializer", StringDeserializer.class);
-            kafkaParams.put("group.id", "spark-kafka-ticker-consumers");
+            kafkaParams.put("group.id", "spark-kafka-sensors");
             kafkaParams.put("auto.offset.reset", "latest");
             kafkaParams.put("enable.auto.commit", false);
             

@@ -1,0 +1,23 @@
+
+Set Master in Eclipse:
+======================
+VM arguments:
+-Dspark.master=spark://myhost:7077
+-Dspark.master=local[n]
+-Dspark.master=local[*]
+
+
+Streaming WordCount on Windows:
+==============================
+RunConfiguration in Eclipse:
+Program Arguments:
+localhost 9999
+
+VM Arguments:
+-Dspark.master=local[*]
+
+
+# Running netcat "Server" with data stream
+nc -l 9999
+this is some data
+this is more data
