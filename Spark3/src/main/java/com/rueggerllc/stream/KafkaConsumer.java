@@ -3,7 +3,6 @@ package com.rueggerllc.stream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
-import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.api.java.function.VoidFunction;
@@ -21,30 +19,20 @@ import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka010.ConsumerStrategies;
-import org.apache.spark.streaming.kafka010.HasOffsetRanges;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
-import org.apache.spark.streaming.kafka010.OffsetRange;
 
 import scala.Tuple2;
 
 public class KafkaConsumer {
 	
 	private static final Logger logger = Logger.getLogger(KafkaConsumer.class);
-	// private static final String BROKERS = "kube:9092";
-	private static final String BROKERS = "localhost:9092";
-	
+	private static final String BROKERS = "sunny:9092";
+	private static final String topicName = "readings";
+
     public static void main(String[] args) throws Exception {
-    	executeNew();
-    }
-    
-    
-    private static void executeNew() {
-        Logger.getLogger("org").setLevel(Level.ERROR);
-        
-     
-        
         logger.info("==== NEW Spark Kafka Consumer ====");
+        Logger.getLogger("org").setLevel(Level.ERROR);
         try {
         	
             SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
@@ -53,10 +41,7 @@ public class KafkaConsumer {
             Logger rootLogger = Logger.getRootLogger();
             rootLogger.setLevel(Level.ERROR);
             
-            // String topicName = "dummy-topic";
-            String topicName = "readings";
             Set<String> topics = new HashSet<>(Arrays.asList(topicName));
-           
             Map<String, Object> kafkaParams = new HashMap<>();
             kafkaParams.put("bootstrap.servers", BROKERS);
             kafkaParams.put("key.deserializer", StringDeserializer.class);
@@ -75,47 +60,15 @@ public class KafkaConsumer {
         			ConsumerStrategies.<String, String>Subscribe(topics, kafkaParams)
         			);
         	
-//        	dStream.foreachRDD(new VoidFunction<JavaRDD<ConsumerRecord<String, String>>>() {
-//        		  @Override
-//        		  public void call(JavaRDD<ConsumerRecord<String, String>> rdd) {
-//        			  
-//        			// System.out.println("NEXT RDD");
-//        	        rdd.foreach(entry -> {
-//        	        	System.out.printf("offset = %d, key = %s, value = %s\n", entry.offset(), entry.key(), entry.value());
-//        	        });	
-//        			
-//        		    final OffsetRange[] offsetRanges = ((HasOffsetRanges) rdd.rdd()).offsetRanges();
-//        		    rdd.foreachPartition(new VoidFunction<Iterator<ConsumerRecord<String, String>>>() {
-//        		      @Override
-//        		      public void call(Iterator<ConsumerRecord<String, String>> consumerRecords) {
-//        		        OffsetRange o = offsetRanges[TaskContext.get().partitionId()];
-//        		        System.out.println(o.topic() + " " + o.partition() + " " + o.fromOffset() + " " + o.untilOffset());
-//        		      }
-//        		    });
-//        		  }
-//        		});
+        	// Diagnostic: Display Messages
+        	dStream.foreachRDD(new MyRDDFunction());
         	
-        	
-        	
-        	JavaPairDStream<String,String> foo =
-        	dStream.mapToPair(
-        			  new PairFunction<ConsumerRecord<String, String>, String, String>() {
-        			    @Override
-        			    public Tuple2<String, String> call(ConsumerRecord<String, String> record) {
-        			      System.out.println(String.format("Got Consumer Record=%s %d %d %s",
-        			    		  record.topic(), record.partition(), record.offset(), record.value()));
-        			      return new Tuple2<>(record.key(), record.value());
-        			    }
-        			  });
-        	
+        	// Map to Key:Message
+        	JavaPairDStream<String,String> messageStream = dStream.mapToPair(new MyMapFunction());       	
         	
         	// Output to sinks
-        	// dstream.map(record=>(record.value().toString)).print
-        	// dStream.print(10);
-//        	
-        	foo.print();
-//        	// dStream.print(10);
-        	
+        	messageStream.print();
+
         	// Start the computation
         	streamingContext.start();
         	streamingContext.awaitTermination();
@@ -125,7 +78,31 @@ public class KafkaConsumer {
         }
     }
     
+    // 
+    private static class MyRDDFunction implements VoidFunction<JavaRDD<ConsumerRecord<String,String>>> {
+		@Override
+		public void call(JavaRDD<ConsumerRecord<String, String>> rdd) throws Exception {
+			rdd.foreach(new MyConsumerRecordFunction());
+		}
+    }  
     
+    private static class MyConsumerRecordFunction implements VoidFunction<ConsumerRecord<String,String>> {
+ 		@Override
+ 		public void call(ConsumerRecord<String, String> input) throws Exception {
+ 			System.out.println(String.format("RDD FUNCTION Consumer Record=%s %d %d %s", input.topic(), input.partition(), input.offset(), input.value()));
+ 		}
+
+     }  
+      
+    // <InputType, OutputTupleType1, OutputTupleType2>
+    private static class MyMapFunction implements PairFunction<ConsumerRecord<String,String>,String,String> {
+		@Override
+		public Tuple2<String, String> call(ConsumerRecord<String, String> input) throws Exception {
+			System.out.println(String.format("MAP FUNCTION Consumer Record=%s %d %d %s", input.topic(), input.partition(), input.offset(), input.value()));
+			return new Tuple2<>(input.key(), input.value());			
+		}
+
+    }  
     
     
     
