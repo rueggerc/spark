@@ -21,3 +21,14 @@ VM Arguments:
 nc -l 9999
 this is some data
 this is more data
+
+
+// On Linux:
+// nc -lk 9999
+// -l 	listen
+// -k 	keep open
+
+// On Windows:
+// nc -l 9999
+// this is some data
+// this is more data	

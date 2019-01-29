@@ -2,6 +2,8 @@ package com.rueggerllc.stream.structured;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Level;
@@ -25,6 +27,17 @@ public class StreamingWordCount {
         logger.info("==== Structured Streaming WordCount BEGIN ====");
         Logger.getLogger("org").setLevel(Level.ERROR);
         
+	    if (args.length < 2) {
+	    	System.err.println("Usage: StreamingWordCount <hostname> <port>");
+	    	logger.error("Usage: StreamingWordCount <hostname> <port>");
+	    	System.exit(1);
+	    }
+	    
+	    String host = args[0];
+	    String port = args[1];
+	    logger.info("host=" + host);
+	    logger.info("port=" + port);
+       
 
 	    SparkSession spark = SparkSession
 	    	.builder()
@@ -35,17 +48,23 @@ public class StreamingWordCount {
 	    Dataset<Row> lines = spark
 	      .readStream()
 	      .format("socket")
-	      .option("host", "captain")
-	      .option("port", 9999)
+	      .option("host", host)
+	      .option("port", port)
 	      .load();
 	    
 	    System.out.println("BP0");
 
 	    // Split the lines into words
+//	    Dataset<String> words = lines
+//	      .as(Encoders.STRING())
+//	      .flatMap((FlatMapFunction<String, String>) x -> Arrays.asList(x.split(" ")).iterator(), Encoders.STRING());
+
+	    // Split the lines into words
 	    Dataset<String> words = lines
 	      .as(Encoders.STRING())
-	      .flatMap((FlatMapFunction<String, String>) x -> Arrays.asList(x.split(" ")).iterator(), Encoders.STRING());
+	      .flatMap(new MyFlatMapper(), Encoders.STRING());
 
+	    
 	    // Generate running word count
 	    Dataset<Row> wordCounts = words.groupBy("value").count();
 	    
@@ -57,12 +76,31 @@ public class StreamingWordCount {
 	      // .trigger(Trigger.Continuous(1000))
 	      .start();
 
-	    System.out.println("YEAH DOG LETS GO");
+	    System.out.println("OK HERE WE GO");
 	    
 	    // Wait
 	    query.awaitTermination();
 	    
-    
         logger.info("==== StreamingWordCount END ====");
     }
+    
+    private static class MyFlatMapper implements FlatMapFunction<String,String> {
+		// @Override
+		public Iterator<String> call(String line) throws Exception {
+			String[] tokenArray = line.toLowerCase().split(" ");
+			List<String> tokens = Arrays.asList(tokenArray);
+			return tokens.iterator();
+		}
+    }   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
