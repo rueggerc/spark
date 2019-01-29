@@ -1,0 +1,7 @@
+
+# PIP on development machine
+pip install pyspark==2.4.0
+
+
+# Submit Job
+spark-submit WordCount.py --master spark://captain:7077

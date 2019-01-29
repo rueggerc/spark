@@ -1,6 +1,5 @@
 package com.rueggerllc.stream.structured;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +13,6 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQuery;
-import org.apache.spark.sql.streaming.Trigger;
 
 public class StreamingWordCount {
 	
