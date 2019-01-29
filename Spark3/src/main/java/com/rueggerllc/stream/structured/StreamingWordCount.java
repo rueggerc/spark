@@ -55,11 +55,6 @@ public class StreamingWordCount {
 	    System.out.println("BP0");
 
 	    // Split the lines into words
-//	    Dataset<String> words = lines
-//	      .as(Encoders.STRING())
-//	      .flatMap((FlatMapFunction<String, String>) x -> Arrays.asList(x.split(" ")).iterator(), Encoders.STRING());
-
-	    // Split the lines into words
 	    Dataset<String> words = lines
 	      .as(Encoders.STRING())
 	      .flatMap(new MyFlatMapper(), Encoders.STRING());
