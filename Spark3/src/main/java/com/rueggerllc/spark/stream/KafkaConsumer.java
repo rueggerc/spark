@@ -1,4 +1,4 @@
-package com.rueggerllc.stream;
+package com.rueggerllc.spark.stream;
 
 import java.util.Arrays;
 import java.util.HashMap;

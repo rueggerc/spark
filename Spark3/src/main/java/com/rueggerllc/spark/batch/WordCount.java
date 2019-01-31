@@ -1,4 +1,4 @@
-package com.rueggerllc.batch;
+package com.rueggerllc.spark.batch;
 
 import java.util.Arrays;
 import java.util.Iterator;
