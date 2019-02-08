@@ -43,7 +43,8 @@ public class WordCount {
 	    for (Tuple2<String,Integer> next : wordCount.collect()) {
 	    	System.out.println("NEXT=" + next._1() + " " + next._2());
 	    }
-		wordCount.saveAsTextFile("output/wordCount");
+		// wordCount.saveAsTextFile("output/wordCount");
+		wordCount.coalesce(1).saveAsTextFile("output/wordCount");
 		
 	    // Done
         if (sc != null) {
@@ -62,6 +63,8 @@ public class WordCount {
 		}
     }
     
+    // PairFunction<InputType, Output.KeyType, Output.ValueType> 
+    // <InputType, Tuple2<KeyType, ValueType>
     private static class MyMapFunction implements PairFunction<String,String,Integer> {
 		@Override
 		public Tuple2<String, Integer> call(String word) throws Exception {

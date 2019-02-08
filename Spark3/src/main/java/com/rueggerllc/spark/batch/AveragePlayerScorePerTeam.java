@@ -29,7 +29,8 @@ public class AveragePlayerScorePerTeam {
 	    JavaSparkContext sc = new JavaSparkContext(conf);	   
 
 	    // Get Data
-	    // Create Pair RDDs
+	    // Method1. Create Pair RDDs from List<Tuple2>
+	    // Method2: Transform RDD into PairRDD
 	    List<Tuple2<String,Double>> playerScoresList = new ArrayList<>();
 	    playerScoresList.add(new Tuple2<String,Double>("TeamA", 5.0));
 	    playerScoresList.add(new Tuple2<String,Double>("TeamB", 3.0));

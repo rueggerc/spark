@@ -15,6 +15,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
+import scala.Tuple3;
 
 public class WordCount {
 	
@@ -39,11 +40,15 @@ public class WordCount {
 	    	.mapToPair(new MyMapFunction())
 	    	.reduceByKey(new MyReduceFunction());
 	    
+	    
+	    // Tuple3<String,Integer,Integer> foo = new Tuple3<>("Foo", 1,3);
+	    
 	    // Write To Sink(s)
 	    for (Tuple2<String,Integer> next : wordCount.collect()) {
 	    	System.out.println("NEXT=" + next._1() + " " + next._2());
 	    }
-		wordCount.saveAsTextFile("output/wordCount");
+		// wordCount.saveAsTextFile("output/wordCount");
+		wordCount.coalesce(1).saveAsTextFile("output/wordCount");
 		
 	    // Done
         if (sc != null) {
@@ -53,6 +58,7 @@ public class WordCount {
         logger.info("==== WordCount END ====");
     }
     
+    // FlatMapFunction: <InputType, Iterator<OutputType>
     private static class MyFlatMapper implements FlatMapFunction<String,String> {
 		// @Override
 		public Iterator<String> call(String line) throws Exception {
@@ -62,6 +68,7 @@ public class WordCount {
 		}
     }
     
+    // PairFunction: InputType, Tuple2<OutputType._1, OutputType._2>
     private static class MyMapFunction implements PairFunction<String,String,Integer> {
 		// @Override
 		public Tuple2<String, Integer> call(String word) throws Exception {
@@ -69,6 +76,7 @@ public class WordCount {
 		}
     }
     
+    // ReduceFunctin: InputType1, InputType2, OutputType
     private static class MyReduceFunction implements Function2<Integer,Integer,Integer> {
 		// @Override
 		public Integer call(Integer value1, Integer value2) throws Exception {

@@ -1,9 +1,12 @@
 package com.rueggerllc.spark.beans;
 
+import java.sql.Timestamp;
+
 public class DummyBean {
 	
 	private String sensor_id;
 	private String notes;
+	private Timestamp reading_time;
 	private double temperature;
 	private double humidity;
 	
@@ -31,7 +34,11 @@ public class DummyBean {
 	public void setHumidity(double humidity) {
 		this.humidity = humidity;
 	}
-	
-
+	public Timestamp getReading_time() {
+		return reading_time;
+	}
+	public void setReading_time(Timestamp reading_time) {
+		this.reading_time = reading_time;
+	}
 
 }
