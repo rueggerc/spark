@@ -27,8 +27,8 @@ import scala.Tuple2;
 public class KafkaConsumer {
 	
 	private static final Logger logger = Logger.getLogger(KafkaConsumer.class);
-	private static final String BROKERS = "sunny:9092";
-	private static final String topicName = "readings";
+	private static final String BROKERS = "kube:9092";
+	private static final String topicName = "sensors";
 
     public static void main(String[] args) throws Exception {
         logger.info("==== NEW Spark Kafka Consumer ====");
@@ -36,7 +36,7 @@ public class KafkaConsumer {
         try {
         	
             SparkConf sparkConf = new SparkConf().setAppName("SparkStreamKafkaConsumer");
-            JavaStreamingContext streamingContext = new JavaStreamingContext(sparkConf, Durations.minutes(1));
+            JavaStreamingContext streamingContext = new JavaStreamingContext(sparkConf, Durations.minutes(60));
             
             Logger rootLogger = Logger.getRootLogger();
             rootLogger.setLevel(Level.ERROR);
