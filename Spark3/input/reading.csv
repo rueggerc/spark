@@ -1,0 +1,4 @@
+sensor_id,reading_time,notes,temperature,humidity
+sensor1,1549707239894,My Notes from CSV,24.11,42.90
+sensor1,1549707239894,My Notes from CSV,68.33,10.56
+sensor1,1549707239894,My Notes from CSV,70.42,11.22

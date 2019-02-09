@@ -2,7 +2,7 @@ package com.rueggerllc.spark.beans;
 
 import java.sql.Timestamp;
 
-public class DummyBean {
+public class ReadingBean {
 	
 	private String sensor_id;
 	private String notes;
