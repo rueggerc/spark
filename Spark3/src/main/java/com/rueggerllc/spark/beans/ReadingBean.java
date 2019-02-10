@@ -1,14 +1,19 @@
 package com.rueggerllc.spark.beans;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class ReadingBean {
+public class ReadingBean implements Serializable {
 	
 	private String sensor_id;
 	private String notes;
 	private Timestamp reading_time;
 	private double temperature;
 	private double humidity;
+	
+	public String toString() {
+		return String.format("%s %.2f %.2f %s", sensor_id, temperature, humidity, reading_time);
+	}
 	
 	public String getSensor_id() {
 		return sensor_id;
