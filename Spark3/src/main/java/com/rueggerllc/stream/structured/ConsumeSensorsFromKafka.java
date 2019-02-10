@@ -1,10 +1,12 @@
 package com.rueggerllc.stream.structured;
 
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.api.java.function.VoidFunction2;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
@@ -72,7 +74,12 @@ public class ConsumeSensorsFromKafka {
     	    // readingsStream.printSchema(); 	    
     	    
     	    Dataset<Row> readingsRowStream = readingsStream.toDF();
-    	    readingsRowStream.printSchema();
+    	    // readingsRowStream.printSchema();
+    	    // writeToSink(readingsRowStream);
+    	    
+    	    
+    	    
+    	    
     	   
     	    
     	    // root
@@ -85,6 +92,19 @@ public class ConsumeSensorsFromKafka {
   	    	      .writeStream()
   	    	      .format("console")
   	    	      .start();
+    	    
+    	    // Write to Sink
+    	    // readingsRowStream.writeStream().foreachBatch(function);
+    	    StreamingQuery writeToSinkQuery = readingsRowStream.writeStream().foreachBatch(new PostgresSink()).start();
+    	    
+    	    
+//    	    readingsRowStream.writeStream().foreachBatch(
+//    	    		  new VoidFunction2<Dataset<Row>, Long> {
+//    	    		    public void call(Dataset<Row> dataset, Long batchId) {
+//    	    		      // Transform and write batchDF
+//    	    		    }    
+//    	    		  }
+//    	    		).start();
   	   
     	    // Output to Sink
 //    	    StreamingQuery query = dataFrame
@@ -101,6 +121,16 @@ public class ConsumeSensorsFromKafka {
         }
     }
     
+    private static class PostgresSink implements VoidFunction2<Dataset<Row>,Long> {
+		@Override
+		public void call(Dataset<Row> dataset, Long v2) throws Exception {
+			System.out.println("WRITE TO SINK");
+			dataset.show(10);
+			writeToSink(dataset);
+		}
+    }
+    
+    
     // HP1, 9.91,25.63,1549824596590
     private static class MyMapToBeanFunction implements MapFunction<Row,ReadingBean> {
 
@@ -108,10 +138,9 @@ public class ConsumeSensorsFromKafka {
 		public ReadingBean call(Row row) throws Exception {
 			System.out.println("=== MAP TO BEAN ===");
 			
+			
 			int index = row.fieldIndex("value");
 			String message = row.getString(index);
-			System.out.println("VALUE=" + message);
-			
 			String[] tokens = message.split(",");
 			String sensorID = tokens[0];
 			double temperature = Double.parseDouble(tokens[1]);
@@ -121,10 +150,9 @@ public class ConsumeSensorsFromKafka {
 			ReadingBean readingBean = new ReadingBean();
 			readingBean.setSensor_id(sensorID);
 			readingBean.setTemperature(temperature);
-			readingBean.setNotes("");
+			readingBean.setNotes("Spark!");
 			readingBean.setHumidity(humidity);
-			System.out.println("timestamp=" + timestamp);
-			
+			readingBean.setReading_time(new Timestamp(timestamp));
 			
 			return readingBean;
 		}
