@@ -12,7 +12,7 @@ public class ReadingBean implements Serializable {
 	private double humidity;
 	
 	public String toString() {
-		return String.format("%s %.2f %.2f %s", sensor_id, temperature, humidity, reading_time);
+		return String.format("READING: %s %.2f %.2f %s", sensor_id, temperature, humidity, reading_time);
 	}
 	
 	public String getSensor_id() {

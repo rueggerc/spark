@@ -1,17 +1,25 @@
 package com.rueggerllc.stream.structured;
 
+import java.util.Properties;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQuery;
+
+import com.rueggerllc.spark.beans.ReadingBean;
 
 public class ConsumeSensorsFromKafka {
 	
 	private static final Logger logger = Logger.getLogger(ConsumeSensorsFromKafka.class);
 	private static final String BROKERS = "localhost:9092";
 	private static final String TOPIC = "readings";
+	private static final String STARTING_OFFSET = "latest";
 
     public static void main(String[] args) throws Exception {
         logger.info("==== NEW Spark Kafka Consumer ====");
@@ -33,16 +41,56 @@ public class ConsumeSensorsFromKafka {
         	    .format("kafka")
         	    .option("kafka.bootstrap.servers", BROKERS)
         	    .option("subscribe", TOPIC)
-        	    .option("startingOffsets", "latest")
+        	    .option("startingOffsets", STARTING_OFFSET)
         	    .load();
     	    
+    	    // root
+    	    // |-- key: binary (nullable = true)
+    	    // |-- value: binary (nullable = true)
+    	    // |-- topic: string (nullable = true)
+    	    // |-- partition: integer (nullable = true)
+    	    // |-- offset: long (nullable = true)
+    	    // |-- timestamp: timestamp (nullable = true)
+    	    // |-- timestampType: integer (nullable = true)
     	    dataFrame.printSchema();
+    	    
+    	    Dataset<Row> keyValueStream = dataFrame.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)");
+//    	    StreamingQuery query = keyValueStream 
+//    	    	      .writeStream()
+//    	    	      .format("console")
+//    	    	      .start();
+    	    
+//    	    Dataset<Row> valueStream = dataFrame.selectExpr("CAST(value AS STRING)");
+//    	    valueStream.printSchema();
+//    	    StreamingQuery query = valueStream 
+//  	    	      .writeStream()
+//  	    	      .format("console")
+//  	    	      .start();
+    	    
+    	    
+    	    Dataset<ReadingBean> readingsStream = keyValueStream.map(new MyMapToBeanFunction(), Encoders.bean(ReadingBean.class));
+    	    // readingsStream.printSchema(); 	    
+    	    
+    	    Dataset<Row> readingsRowStream = readingsStream.toDF();
+    	    readingsRowStream.printSchema();
     	   
+    	    
+    	    // root
+    	    // |-- humidity: double (nullable = true)
+    	    // |-- notes: string (nullable = true)
+    	    // |-- reading_time: timestamp (nullable = true)
+    	    // |-- sensor_id: string (nullable = true)
+    	    // |-- temperature: double (nullable = true)
+    	    StreamingQuery query = readingsRowStream 
+  	    	      .writeStream()
+  	    	      .format("console")
+  	    	      .start();
+  	   
     	    // Output to Sink
-    	    StreamingQuery query = dataFrame
-    	      .writeStream()
-    	      .format("console")
-    	      .start();
+//    	    StreamingQuery query = dataFrame
+//    	      .writeStream()
+//    	      .format("console")
+//    	      .start();
     	    
     	    // Wait for Termination
     	    query.awaitTermination();
@@ -51,6 +99,45 @@ public class ConsumeSensorsFromKafka {
         } catch (Exception e) {
         	logger.error("ERROR", e);
         }
+    }
+    
+    // HP1, 9.91,25.63,1549824596590
+    private static class MyMapToBeanFunction implements MapFunction<Row,ReadingBean> {
+
+		@Override
+		public ReadingBean call(Row row) throws Exception {
+			System.out.println("=== MAP TO BEAN ===");
+			
+			int index = row.fieldIndex("value");
+			String message = row.getString(index);
+			System.out.println("VALUE=" + message);
+			
+			String[] tokens = message.split(",");
+			String sensorID = tokens[0];
+			double temperature = Double.parseDouble(tokens[1]);
+			double humidity = Double.parseDouble(tokens[2]);
+			long timestamp = Long.parseLong(tokens[3]);
+			
+			ReadingBean readingBean = new ReadingBean();
+			readingBean.setSensor_id(sensorID);
+			readingBean.setTemperature(temperature);
+			readingBean.setNotes("");
+			readingBean.setHumidity(humidity);
+			System.out.println("timestamp=" + timestamp);
+			
+			
+			return readingBean;
+		}
+    }  
+    
+    private static void writeToSink(Dataset<Row> dataFrame) {
+	    // Write to JDBC Sink
+	    String url = "jdbc:postgresql://localhost:5432/rueggerllc";
+	    String table = "reading";
+	    Properties connectionProperties = new Properties();
+	    connectionProperties.setProperty("user", "chris");
+	    connectionProperties.setProperty("password", "dakota");
+	    dataFrame.write().mode(SaveMode.Append).jdbc(url, table, connectionProperties);    	
     }
     
     
