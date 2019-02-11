@@ -13,8 +13,11 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQuery;
+import org.apache.spark.sql.streaming.Trigger;
 
 import com.rueggerllc.spark.beans.ReadingBean;
+
+import scala.concurrent.duration.Duration;
 
 public class ConsumeKafkaWriteToPostgres {
 	
@@ -71,10 +74,15 @@ public class ConsumeKafkaWriteToPostgres {
     	    // |-- sensor_id: string (nullable = true)
     	    // |-- temperature: double (nullable = true)
     	    StreamingQuery query = readingsRowStream 
-  	    	      .writeStream()
-  	    	      .format("console")
-  	    	      .start();
-    	    StreamingQuery writeToSinkQuery = readingsRowStream.writeStream().foreachBatch(new PostgresSink()).start();
+    	    	.writeStream()
+  	    	  	.trigger(Trigger.ProcessingTime("60 seconds"))
+  	    	  	.format("console")
+  	    	    .start();
+    	    StreamingQuery writeToSinkQuery = readingsRowStream
+    	    	.writeStream()
+    	    	.trigger(Trigger.ProcessingTime("60 seconds"))
+    	    	.foreachBatch(new PostgresSink())
+    	    	.start();
     	    
     	    // Wait for Termination
     	    query.awaitTermination();
@@ -121,7 +129,7 @@ public class ConsumeKafkaWriteToPostgres {
     
     private static void writeToSink(Dataset<Row> dataFrame) {
 	    // Write to JDBC Sink
-	    String url = "jdbc:postgresql://localhost:5432/rueggerllc";
+	    String url = "jdbc:postgresql://captain:5432/rueggerllc";
 	    String table = "spark_readings";
 	    Properties connectionProperties = new Properties();
 	    connectionProperties.setProperty("user", "chris");
