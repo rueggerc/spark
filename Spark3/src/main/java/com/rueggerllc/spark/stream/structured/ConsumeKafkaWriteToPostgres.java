@@ -35,6 +35,7 @@ public class ConsumeKafkaWriteToPostgres {
         try {
         	
         	System.out.println(ConsumeKafkaWriteToPostgres.class.getName());
+        	Class.forName("org.postgresql.Driver");
         	
     	    // Get Our Session
             // -Dspark.master=local[*]
