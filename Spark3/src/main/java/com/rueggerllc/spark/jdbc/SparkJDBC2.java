@@ -29,6 +29,7 @@ public class SparkJDBC2 {
     	// Setup
     	logger.info("==== SparkJDBC2 BEGIN ====");
         Logger.getLogger("org").setLevel(Level.ERROR);
+        Class.forName("org.postgresql.Driver");
        
               
 	    // Get Our Session
