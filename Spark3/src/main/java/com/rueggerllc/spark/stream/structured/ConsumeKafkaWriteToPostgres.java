@@ -35,7 +35,6 @@ public class ConsumeKafkaWriteToPostgres {
         try {
         	
         	System.out.println(ConsumeKafkaWriteToPostgres.class.getName());
-        	Class.forName("org.postgresql.Driver");
         	
     	    // Get Our Session
             // -Dspark.master=local[*]
@@ -81,6 +80,7 @@ public class ConsumeKafkaWriteToPostgres {
   	    	    .start();
     	    StreamingQuery writeToSinkQuery = readingsRowStream
     	    	.writeStream()
+    	    	// .option("driver", "org.postgresql.Driver")
     	    	.trigger(Trigger.ProcessingTime("60 seconds"))
     	    	.foreachBatch(new PostgresSink())
     	    	.start();
@@ -130,11 +130,13 @@ public class ConsumeKafkaWriteToPostgres {
     
     private static void writeToSink(Dataset<Row> dataFrame) {
 	    // Write to JDBC Sink
-	    String url = "jdbc:postgresql://captain:5432/rueggerllc";
+	    String url = "jdbc:postgresql://localhost:5432/rueggerllc";
 	    String table = "spark_readings";
 	    Properties connectionProperties = new Properties();
 	    connectionProperties.setProperty("user", "chris");
 	    connectionProperties.setProperty("password", "dakota");
+	    connectionProperties.setProperty("password", "dakota");
+	    connectionProperties.setProperty("Driver", "org.postgresql.Driver");
 	    dataFrame.write().mode(SaveMode.Append).jdbc(url, table, connectionProperties);    	
     }
     
