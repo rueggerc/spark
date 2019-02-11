@@ -19,8 +19,12 @@ import com.rueggerllc.spark.beans.ReadingBean;
 public class ConsumeKafkaWriteToPostgres {
 	
 	private static final Logger logger = Logger.getLogger(ConsumeKafkaWriteToPostgres.class);
-	private static final String BROKERS = "localhost:9092";
-	private static final String TOPIC = "readings";
+	// private static final String BROKERS = "localhost:9092";
+	// private static final String TOPIC = "readings";
+	
+	private static final String BROKERS = "kube:9092";
+	private static final String TOPIC = "sensors";
+	
 	private static final String STARTING_OFFSET = "latest";
 
     public static void main(String[] args) throws Exception {
@@ -52,11 +56,12 @@ public class ConsumeKafkaWriteToPostgres {
     	    // |-- offset: long (nullable = true)
     	    // |-- timestamp: timestamp (nullable = true)
     	    // |-- timestampType: integer (nullable = true)
-    	    // dataFrame.printSchema();
+    	    dataFrame.printSchema();
     	    
     	    Dataset<Row> keyValueStream = dataFrame.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)");
     	    Dataset<ReadingBean> readingsStream = keyValueStream.map(new MyMapToBeanFunction(), Encoders.bean(ReadingBean.class));
     	    Dataset<Row> readingsRowStream = readingsStream.toDF();
+    	    readingsRowStream.printSchema();
  
     	    // Write to Sink(s)
     	    // root
@@ -117,7 +122,7 @@ public class ConsumeKafkaWriteToPostgres {
     private static void writeToSink(Dataset<Row> dataFrame) {
 	    // Write to JDBC Sink
 	    String url = "jdbc:postgresql://localhost:5432/rueggerllc";
-	    String table = "reading";
+	    String table = "spark_readings";
 	    Properties connectionProperties = new Properties();
 	    connectionProperties.setProperty("user", "chris");
 	    connectionProperties.setProperty("password", "dakota");
