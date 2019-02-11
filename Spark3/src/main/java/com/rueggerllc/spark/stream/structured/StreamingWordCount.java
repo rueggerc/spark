@@ -1,4 +1,4 @@
-package com.rueggerllc.stream.structured;
+package com.rueggerllc.spark.stream.structured;
 
 import java.util.Arrays;
 import java.util.Iterator;

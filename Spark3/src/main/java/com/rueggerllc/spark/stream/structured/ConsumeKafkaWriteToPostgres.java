@@ -1,4 +1,4 @@
-package com.rueggerllc.stream.structured;
+package com.rueggerllc.spark.stream.structured;
 
 import java.sql.Timestamp;
 import java.util.Properties;
