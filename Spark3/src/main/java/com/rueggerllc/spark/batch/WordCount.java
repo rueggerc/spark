@@ -24,15 +24,17 @@ public class WordCount {
     public static void main(String[] args) throws Exception {
         Logger.getLogger("org").setLevel(Level.ERROR);
         
-        logger.info("==== WordCount BEGIN ====");
+        logger.info("==== OK HERE WE GO BEGIN ====");
         
         // Get Spark Context
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName(WordCount.class.getName()).setMaster("local[*]");
 	    JavaSparkContext sc = new JavaSparkContext(conf);	   
 	    logger.info("Context Created");
         
 	    // Get Data
-	    JavaRDD<String> lines = sc.textFile("input/rawlines.txt");
+	    String inputFile = "hdfs://hp1:9000/user/Chris/input/wordcount";
+	    //String inputFile = "input/rawlines.txt";
+	    JavaRDD<String> lines = sc.textFile(inputFile);
 	    
 	    // Transformations
 	    JavaPairRDD<String,Integer> wordCount = lines
@@ -44,11 +46,13 @@ public class WordCount {
 	    // Tuple3<String,Integer,Integer> foo = new Tuple3<>("Foo", 1,3);
 	    
 	    // Write To Sink(s)
+	    // String outputFile = "output/wordCount";
+	    String sinkFile = "hdfs://hp1:9000/user/Chris/output/wordcount";
 	    for (Tuple2<String,Integer> next : wordCount.collect()) {
 	    	System.out.println("NEXT=" + next._1() + " " + next._2());
 	    }
 		// wordCount.saveAsTextFile("output/wordCount");
-		wordCount.coalesce(1).saveAsTextFile("output/wordCount");
+		wordCount.coalesce(1).saveAsTextFile(sinkFile);
 		
 	    // Done
         if (sc != null) {
