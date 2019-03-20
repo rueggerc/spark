@@ -19,28 +19,24 @@ import com.rueggerllc.spark.beans.ReadingBean;
 
 import scala.concurrent.duration.Duration;
 
-public class ConsumeKafkaWriteToPostgres {
+public class SparkConsumerWriteSensorData {
 	
-	private static final Logger logger = Logger.getLogger(ConsumeKafkaWriteToPostgres.class);
-	// private static final String BROKERS = "localhost:9092";
-	// private static final String TOPIC = "readings";
-	
+	private static final Logger logger = Logger.getLogger(SparkConsumerWriteSensorData.class);	
 	private static final String BROKERS = "kube:9092";
 	private static final String TOPIC = "sensors";
-	
 	private static final String STARTING_OFFSET = "latest";
 
     public static void main(String[] args) throws Exception {
         Logger.getLogger("org").setLevel(Level.ERROR);
         try {
         	
-        	System.out.println(ConsumeKafkaWriteToPostgres.class.getName());
+        	System.out.println(SparkConsumerWriteSensorData.class.getName());
         	
     	    // Get Our Session
             // -Dspark.master=local[*]
     	    SparkSession spark = SparkSession
     		    .builder()
-    		    .appName(ConsumeKafkaWriteToPostgres.class.getName())
+    		    .appName(SparkConsumerWriteSensorData.class.getName())
     		    .getOrCreate();
     	    
     	    Dataset<Row> dataFrame = spark
@@ -51,7 +47,7 @@ public class ConsumeKafkaWriteToPostgres {
         	    .option("startingOffsets", STARTING_OFFSET)
         	    .load();
     	    
-    	    // root
+    	    // schema
     	    // |-- key: binary (nullable = true)
     	    // |-- value: binary (nullable = true)
     	    // |-- topic: string (nullable = true)
@@ -61,23 +57,19 @@ public class ConsumeKafkaWriteToPostgres {
     	    // |-- timestampType: integer (nullable = true)
     	    dataFrame.printSchema();
     	    
+    	    // Get Kafka Message and Encode to Bean
     	    Dataset<Row> keyValueStream = dataFrame.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)");
     	    Dataset<ReadingBean> readingsStream = keyValueStream.map(new MyMapToBeanFunction(), Encoders.bean(ReadingBean.class));
     	    Dataset<Row> readingsRowStream = readingsStream.toDF();
     	    readingsRowStream.printSchema();
  
-    	    // Write to Sink(s)
+    	    // Write Bean Data to Sink(s)
     	    // root
     	    // |-- humidity: double (nullable = true)
     	    // |-- notes: string (nullable = true)
     	    // |-- reading_time: timestamp (nullable = true)
     	    // |-- sensor_id: string (nullable = true)
     	    // |-- temperature: double (nullable = true)
-//    	    StreamingQuery query = readingsRowStream 
-//    	    	.writeStream()
-//  	    	  	.trigger(Trigger.ProcessingTime("60 seconds"))
-//  	    	  	.format("console")
-//  	    	    .start();
     	    StreamingQuery streamingQuery = readingsRowStream
     	    	.writeStream()
     	    	.trigger(Trigger.ProcessingTime("60 seconds"))
@@ -94,12 +86,12 @@ public class ConsumeKafkaWriteToPostgres {
         }
     }
     
+    // Write to JDBC Sink
     private static class PostgresSink implements VoidFunction2<Dataset<Row>,Long> {
 		@Override
 		public void call(Dataset<Row> dataFrame, Long v2) throws Exception {
-			logger.info("Write to Sink");
-			
-		    // Write to JDBC Sink
+			logger.info("Write Dataframe to to Postgres");
+		   
 		    String url = "jdbc:postgresql://captain:5432/rueggerllc";
 		    String table = "spark_readings";
 		    Properties connectionProperties = new Properties();
@@ -107,7 +99,6 @@ public class ConsumeKafkaWriteToPostgres {
 		    connectionProperties.setProperty("password", "dakota");
 		    connectionProperties.setProperty("Driver", "org.postgresql.Driver");
 		    dataFrame.write().mode(SaveMode.Append).jdbc(url, table, connectionProperties);    	
-			
 		}
     }
     
@@ -132,7 +123,7 @@ public class ConsumeKafkaWriteToPostgres {
 			readingBean.setHumidity(humidity);
 			readingBean.setReading_time(new Timestamp(timestamp));
 			
-			logger.info("Got Reading: " + sensorID);
+			logger.info(String.format("Got Reading %.2f %.2f", sensorID, temperature, humidity));
 			return readingBean;
 		}
     }  
