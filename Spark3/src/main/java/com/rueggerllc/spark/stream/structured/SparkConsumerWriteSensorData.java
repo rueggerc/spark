@@ -123,7 +123,7 @@ public class SparkConsumerWriteSensorData {
 			readingBean.setHumidity(humidity);
 			readingBean.setReading_time(new Timestamp(timestamp));
 			
-			logger.info(String.format("Got Reading %.2f %.2f", sensorID, temperature, humidity));
+			logger.info(String.format("Got Reading %s %.2f %.2f", sensorID, temperature, humidity));
 			return readingBean;
 		}
     }  
