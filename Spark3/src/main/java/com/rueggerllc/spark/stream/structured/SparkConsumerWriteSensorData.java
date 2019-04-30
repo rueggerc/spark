@@ -62,6 +62,8 @@ public class SparkConsumerWriteSensorData {
     	    Dataset<ReadingBean> readingsStream = keyValueStream.map(new MyMapToBeanFunction(), Encoders.bean(ReadingBean.class));
     	    Dataset<Row> readingsRowStream = readingsStream.toDF();
     	    readingsRowStream.printSchema();
+    	    
+    	    logger.info("================OK HERE WE GO ====================");
  
     	    // Write Bean Data to Sink(s)
     	    // root
@@ -78,6 +80,7 @@ public class SparkConsumerWriteSensorData {
     	    	.start();
     	    
     	    // Wait for Termination
+    	    logger.info("Application Running, waiting for Input");
     	    streamingQuery.awaitTermination();
     	   	    
         	
