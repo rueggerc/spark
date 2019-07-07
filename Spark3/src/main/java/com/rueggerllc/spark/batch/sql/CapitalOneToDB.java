@@ -40,8 +40,8 @@ public class CapitalOneToDB {
     }
     
     private static Dataset<Row> getSourceFromCSV(SparkSession spark) {
-    	String csvPath = "hdfs://hp1:9000/user/Chris/input/capitalone";
-	    // String csvPath = "input/capitalone.csv";
+    	// String csvPath = "hdfs://hp1:9000/user/Chris/input/capitalone";
+	    String csvPath = "input/capitalone_2019_05.csv";
 	    DataFrameReader dataFrameReader = spark.read();
 	    Dataset<Row> dataFrame = 
 	        dataFrameReader
@@ -65,17 +65,6 @@ public class CapitalOneToDB {
 	    // Diagnostics and Sink
 	    // dataFrame.show();
     }
-    
-//    private static void writeToJDBCSink(Dataset<Row> dataFrame) {
-//	    String url = "jdbc:postgresql://localhost:5432/rueggerllc";
-//	    String table = "capitalone";
-//	    Properties connectionProperties = new Properties();
-//	    connectionProperties.setProperty("user", "chris");
-//	    connectionProperties.setProperty("password", "dakota");
-//	    connectionProperties.setProperty("password", "dakota");
-//	    connectionProperties.setProperty("Driver", "org.postgresql.Driver");
-//	    dataFrame.write().mode(SaveMode.Append).jdbc(url, table, connectionProperties);    	
-//    }
     
 
 }
